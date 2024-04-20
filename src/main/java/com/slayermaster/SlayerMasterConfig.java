@@ -1,11 +1,11 @@
-package com.example;
+package com.slayermaster;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("example")
-public interface ExampleConfig extends Config
+@ConfigGroup("slayermaster")
+public interface SlayerMasterConfig extends Config
 {
 	@ConfigItem(
 		keyName = "greeting",
@@ -14,6 +14,16 @@ public interface ExampleConfig extends Config
 	)
 	default String greeting()
 	{
-		return "Hello";
+		return "Let's do this!";
+	}
+
+	@ConfigItem(
+		keyName = "uniqueKey",
+		name = "Display text",
+		description = "Hover text"
+	)
+	default boolean myCheckbox()
+	{
+		return true;
 	}
 }
