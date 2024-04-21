@@ -11,6 +11,8 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Slf4j
 @PluginDescriptor(
@@ -18,6 +20,8 @@ import net.runelite.client.plugins.PluginDescriptor;
 )
 public class SlayerMasterPlugin extends Plugin
 {
+	private static final Logger log = LoggerFactory.getLogger(SlayerMasterPlugin.class);
+	
 	@Inject
 	private Client client;
 
