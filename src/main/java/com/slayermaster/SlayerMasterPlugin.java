@@ -55,7 +55,7 @@ public class SlayerMasterPlugin extends Plugin
 		//log.info("Slayer Master started!");
 		//panel = injector.getInstance(TestPanel.class);
 		//panel.init();
-		panel = new SlayerMasterPanel();
+		panel = new SlayerMasterPanel(spriteManager);
 
 		spriteManager.getSpriteAsync(SpriteID.SKILL_SLAYER, 0, sprite -> {
 			final BufferedImage icon = ImageUtil.resizeImage(sprite, 25, 25);

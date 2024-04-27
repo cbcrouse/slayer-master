@@ -1,14 +1,14 @@
 package com.slayermaster;
 
 import net.runelite.client.ui.PluginPanel;
-
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import net.runelite.api.SpriteID;
+import net.runelite.client.game.SpriteManager;
 
 public class SlayerMasterPanel extends PluginPanel
 {
@@ -19,11 +19,22 @@ public class SlayerMasterPanel extends PluginPanel
     private JTextArea detailTextArea;
     private Map<String, Monster> monsterDetails;
 
-    public SlayerMasterPanel()
+    private SpriteManager spriteManager;
+
+    public SlayerMasterPanel(SpriteManager spriteManager)
     {
+        if (spriteManager == null) {
+            System.out.println("SpriteManager not initialized");
+            return; // or handle the case more gracefully
+        }
+
+        this.spriteManager = spriteManager;
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
-        setLayout(new BorderLayout());
+
+        // Use layout managers effectively to space elements
+        setLayout(new BorderLayout(10, 10)); // Adds 10 pixels of spacing both horizontally and vertically between components
+
         add(cardPanel, BorderLayout.CENTER);
 
         monsterDetails = new HashMap<>();
@@ -38,8 +49,10 @@ public class SlayerMasterPanel extends PluginPanel
         listPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Search field
-        JTextField searchField = new JTextField();
+        JTextField searchField = getSearchField();
         listPanel.add(searchField, BorderLayout.NORTH);
+
+        // Search field search filter
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { filter(); }
             public void removeUpdate(DocumentEvent e) { filter(); }
@@ -77,6 +90,48 @@ public class SlayerMasterPanel extends PluginPanel
                 Monster details = monsterDetails.get(selectedMonster);
                 detailTextArea.setText(getMonsterDetails(details));
                 cardLayout.show(cardPanel, "Details");
+            }
+        });
+
+        // Set borders around the monster list for spacing
+        monsterList.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    }
+
+    private JTextField getSearchField()
+    {
+        // JTextField searchField = new JTextField();
+        IconTextField searchField = new IconTextField(20, spriteManager); // Assuming spriteManager is available
+
+        // Customize search field size and font
+        searchField.setPreferredSize(new Dimension(200, 30)); // Set preferred height to 30
+        searchField.setFont(new Font("SansSerif", Font.PLAIN, 14)); // Adjust font size as needed
+
+        // Set margins around the search field for spacing
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+                searchField.getBorder(),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+        // addSearchIcon(searchField);
+
+        return searchField;
+    }
+
+    public void addSearchIcon(JTextField searchField)
+    {
+        // Load the sprite asynchronously
+        spriteManager.getSpriteAsync(SpriteID.GE_SEARCH, 0, sprite -> {
+            if (sprite != null) {
+                ImageIcon icon = new ImageIcon(sprite);
+                JLabel label = new JLabel(icon);
+                label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0)); // Right padding to prevent overlap
+                searchField.setLayout(new BorderLayout());
+                searchField.add(label, BorderLayout.EAST);
+                searchField.setBorder(BorderFactory.createCompoundBorder(
+                        searchField.getBorder(),
+                        BorderFactory.createEmptyBorder(0, 5, 0, 0) // Add padding inside the field for text
+                ));
+            } else {
+                System.out.println("Sprite could not be loaded");
             }
         });
     }
