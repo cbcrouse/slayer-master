@@ -15,6 +15,9 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.api.SpriteID;
+import net.runelite.client.game.SpriteManager;
+
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 
@@ -30,7 +33,8 @@ public class SlayerMasterPlugin extends Plugin
 
 	private static final String ICON_PATH = "/images/slayer_icon.png"; // must be in "src/main/resources"
 
-	private TestPanel panel;
+	private SlayerMasterPanel panel;
+	// private TestPanel panel;
 	private NavigationButton navButton;
 
 	@Inject
@@ -42,21 +46,38 @@ public class SlayerMasterPlugin extends Plugin
 	@Inject
 	private SlayerMasterConfig config;
 
+	@Inject
+	private SpriteManager spriteManager;
+
 	@Override
 	protected void startUp() throws Exception
 	{
-		log.info("Slayer Master started!");
-		panel = injector.getInstance(TestPanel.class);
-		panel.init();
+		//log.info("Slayer Master started!");
+		//panel = injector.getInstance(TestPanel.class);
+		//panel.init();
+		panel = new SlayerMasterPanel();
 
-		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), ICON_PATH);
+		spriteManager.getSpriteAsync(SpriteID.SKILL_SLAYER, 0, sprite -> {
+			final BufferedImage icon = ImageUtil.resizeImage(sprite, 25, 25);
+			navButton = NavigationButton.builder()
+					.tooltip("Slayer Master")
+					.icon(icon)
+					.priority(5)
+					.panel(panel)
+					.build();
 
-		navButton = NavigationButton.builder()
-			.tooltip("Slayer Master")
-			.icon(icon)
-			.priority(10)
-			.panel(panel)
-			.build();
+			clientToolbar.addNavigation(navButton);
+		});
+
+//		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), ICON_PATH);
+//		//final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "slayer_icon.png");
+//
+//		navButton = NavigationButton.builder()
+//			.tooltip("Slayer Master")
+//			.icon(icon)
+//			.priority(10)
+//			.panel(panel)
+//			.build();
 
 		clientToolbar.addNavigation(navButton);
 	}
@@ -64,8 +85,8 @@ public class SlayerMasterPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Slayer Master stopped!");
-		panel.deinit();
+		//log.info("Slayer Master stopped!");
+		//panel.deinit();
 		clientToolbar.removeNavigation(navButton);
 		panel = null;
 		navButton = null;
