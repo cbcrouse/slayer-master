@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Aberrant spectres",
+    "locations": ["Slayer Tower", "Catacombs of Kourend"],
+    "recommendedLocation": "Slayer Tower",
+    "requiredItems": ["Nose peg or Slayer helmet"],
+    "recommendedGear": "Magic gear",
+    "attackStyle": "Magic"
+  },
+  {
+    "name": "Banshees",
+    "locations": ["Slayer Tower"],
+    "recommendedLocation": "Slayer Tower",
+    "requiredItems": ["Earmuffs or Slayer helmet"],
+    "recommendedGear": "Ranged gear",
+    "attackStyle": "Ranged"
+  },
+  {
+    "name": "Blue Dragons",
+    "locations": ["Taverley Dungeon", "Ogre Enclave", "Myth's Guild Dungeon"],
+    "recommendedLocation": "Taverley Dungeon",
+    "requiredItems": ["Anti-dragon shield", "Dragonfire potion"],
+    "recommendedGear": "Stab weapons",
+    "attackStyle": "Melee"
+  },
+  {
+    "name": "Drakes",
+    "locations": ["Karumja Slayer Dungeon"],
+    "recommendedLocation": "Karumja Slayer Dungeon",
+    "requiredItems": ["Boots of stone", "Boots of brimstone or Granite boots"],
+    "recommendedGear": "Ranged or Melee gear",
+    "attackStyle": "Hybrid"
+  }
+]

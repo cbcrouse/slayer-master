@@ -83,8 +83,16 @@ public class SlayerMasterPanel extends PluginPanel
 
     private void initializeMonsterDetails()
     {
-        monsterDetails.put("Monster1", new Monster("Monster1", List.of(new String[]{"Some Location"}), "Recommended Location", new String[]{"Item1", "Item2"}, "Best Gear", "Melee"));
-        monsterDetails.put("Monster2", new Monster("Monster2", List.of(new String[]{"Another Location"}), "Recommended Location", new String[]{"Item3"}, "Alternative Gear", "Magic"));
+        MonsterDataLoader dataLoader = new MonsterDataLoader();
+        // Load the monster data using the data loader
+        var monsters = dataLoader.loadMonsterData();  // Assuming this returns some collection of Monster objects
+
+        // Iterate over each monster and add it to the monsterDetails map
+        for (var monster : monsters) {
+            monsterDetails.put(monster.getName(), monster);
+        }
+//        monsterDetails.put("Monster1", new Monster("Monster1", List.of(new String[]{"Some Location"}), "Recommended Location", new String[]{"Item1", "Item2"}, "Best Gear", "Melee"));
+//        monsterDetails.put("Monster2", new Monster("Monster2", List.of(new String[]{"Another Location"}), "Recommended Location", new String[]{"Item3"}, "Alternative Gear", "Magic"));
     }
 
     private String getMonsterDetails(Monster monster) {
