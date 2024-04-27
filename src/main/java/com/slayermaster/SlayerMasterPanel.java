@@ -27,8 +27,8 @@ public class SlayerMasterPanel extends PluginPanel
             System.out.println("SpriteManager not initialized");
             return; // or handle the case more gracefully
         }
-
         this.spriteManager = spriteManager;
+
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
 
@@ -111,29 +111,7 @@ public class SlayerMasterPanel extends PluginPanel
                 searchField.getBorder(),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
-        // addSearchIcon(searchField);
-
         return searchField;
-    }
-
-    public void addSearchIcon(JTextField searchField)
-    {
-        // Load the sprite asynchronously
-        spriteManager.getSpriteAsync(SpriteID.GE_SEARCH, 0, sprite -> {
-            if (sprite != null) {
-                ImageIcon icon = new ImageIcon(sprite);
-                JLabel label = new JLabel(icon);
-                label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0)); // Right padding to prevent overlap
-                searchField.setLayout(new BorderLayout());
-                searchField.add(label, BorderLayout.EAST);
-                searchField.setBorder(BorderFactory.createCompoundBorder(
-                        searchField.getBorder(),
-                        BorderFactory.createEmptyBorder(0, 5, 0, 0) // Add padding inside the field for text
-                ));
-            } else {
-                System.out.println("Sprite could not be loaded");
-            }
-        });
     }
 
     private void initializeMonsterDetails()
@@ -146,8 +124,6 @@ public class SlayerMasterPanel extends PluginPanel
         for (var monster : monsters) {
             monsterDetails.put(monster.getName(), monster);
         }
-//        monsterDetails.put("Monster1", new Monster("Monster1", List.of(new String[]{"Some Location"}), "Recommended Location", new String[]{"Item1", "Item2"}, "Best Gear", "Melee"));
-//        monsterDetails.put("Monster2", new Monster("Monster2", List.of(new String[]{"Another Location"}), "Recommended Location", new String[]{"Item3"}, "Alternative Gear", "Magic"));
     }
 
     private String getMonsterDetails(Monster monster) {
