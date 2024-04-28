@@ -7,7 +7,6 @@ import java.util.Arrays;
 import com.slayermaster.data.ImageCacheManager;
 import com.slayermaster.data.MonsterImageManager;
 import com.slayermaster.data.Monster;
-import net.runelite.client.game.SpriteManager;
 
 public class MonsterDetailPanel extends JPanel
 {
@@ -19,7 +18,7 @@ public class MonsterDetailPanel extends JPanel
     private JLabel detailsNameLabel;
     private Monster currentMonster;
 
-    public MonsterDetailPanel(SpriteManager spriteManager, NavigationController navigationController)
+    public MonsterDetailPanel(NavigationController navigationController)
     {
         setLayout(new BorderLayout());
         initializeComponents(navigationController);

@@ -47,7 +47,7 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
         // Setting up the list and detail panels
         JPanel listPanel = new MonsterListPanel(monsterDetails, spriteManager, this);
         cardPanel.add(listPanel, "List");
-        detailPanel = new MonsterDetailPanel(spriteManager, this); // Assume constructors are correctly defined
+        detailPanel = new MonsterDetailPanel(this); // Assume constructors are correctly defined
         cardPanel.add(detailPanel, "Details"); // Correctly add to cardPanel with a reference name
     }
 
