@@ -1,4 +1,4 @@
-package com.slayermaster.osrswiki;
+package com.slayermaster.api;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class WikiScraper
+public class OSRSWikiScraper
 {
     private final static String baseUrl = "https://oldschool.runescape.wiki";
     private final static String baseWikiUrl = baseUrl + "/w/";

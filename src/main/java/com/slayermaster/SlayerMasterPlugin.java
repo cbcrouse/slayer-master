@@ -1,8 +1,10 @@
 package com.slayermaster;
 
 import com.google.inject.Provides;
+
 import java.awt.image.BufferedImage;
 import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
@@ -18,92 +20,70 @@ import net.runelite.client.util.ImageUtil;
 import net.runelite.api.SpriteID;
 import net.runelite.client.game.SpriteManager;
 
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-
 @Slf4j
 @PluginDescriptor(
-	name = "Slayer Master",
-	description = "Description",
-	loadWhenOutdated = true
+        name = "Slayer Master",
+        description = "Description",
+        loadWhenOutdated = true
 )
 public class SlayerMasterPlugin extends Plugin
 {
-//	private static final Logger log = LoggerFactory.getLogger(SlayerMasterPlugin.class);
+    private SlayerMasterPanel panel;
+    private NavigationButton navButton;
 
-	private static final String ICON_PATH = "/images/slayer_icon.png"; // must be in "src/main/resources"
+    @Inject
+    private Client client;
 
-	private SlayerMasterPanel panel;
-	// private TestPanel panel;
-	private NavigationButton navButton;
+    @Inject
+    private ClientToolbar clientToolbar;
 
-	@Inject
-	private Client client;
+    @Inject
+    private SlayerMasterConfig config;
 
-	@Inject
-	private ClientToolbar clientToolbar;
+    @Inject
+    private SpriteManager spriteManager;
 
-	@Inject
-	private SlayerMasterConfig config;
+    @Override
+    protected void startUp() throws Exception
+    {
+        panel = new SlayerMasterPanel(spriteManager);
 
-	@Inject
-	private SpriteManager spriteManager;
+        spriteManager.getSpriteAsync(SpriteID.SKILL_SLAYER, 0, sprite ->
+        {
+            final BufferedImage icon = ImageUtil.resizeImage(sprite, 25, 25);
+            navButton = NavigationButton.builder()
+                    .tooltip("Slayer Master")
+                    .icon(icon)
+                    .priority(5)
+                    .panel(panel)
+                    .build();
 
-	@Override
-	protected void startUp() throws Exception
-	{
-		//log.info("Slayer Master started!");
-		//panel = injector.getInstance(TestPanel.class);
-		//panel.init();
-		panel = new SlayerMasterPanel(spriteManager);
+            clientToolbar.addNavigation(navButton);
+        });
 
-		spriteManager.getSpriteAsync(SpriteID.SKILL_SLAYER, 0, sprite -> {
-			final BufferedImage icon = ImageUtil.resizeImage(sprite, 25, 25);
-			navButton = NavigationButton.builder()
-					.tooltip("Slayer Master")
-					.icon(icon)
-					.priority(5)
-					.panel(panel)
-					.build();
+        clientToolbar.addNavigation(navButton);
+    }
 
-			clientToolbar.addNavigation(navButton);
-		});
+    @Override
+    protected void shutDown() throws Exception
+    {
+        clientToolbar.removeNavigation(navButton);
+        panel = null;
+        navButton = null;
+    }
 
-//		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), ICON_PATH);
-//		//final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "slayer_icon.png");
-//
-//		navButton = NavigationButton.builder()
-//			.tooltip("Slayer Master")
-//			.icon(icon)
-//			.priority(10)
-//			.panel(panel)
-//			.build();
+    @Subscribe
+    public void onGameStateChanged(GameStateChanged gameStateChanged)
+    {
+        if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+        {
+            client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Slayer Master says " + config.greeting(), null);
+        }
+    }
 
-		clientToolbar.addNavigation(navButton);
-	}
-
-	@Override
-	protected void shutDown() throws Exception
-	{
-		//log.info("Slayer Master stopped!");
-		//panel.deinit();
-		clientToolbar.removeNavigation(navButton);
-		panel = null;
-		navButton = null;
-	}
-
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Slayer Master says " + config.greeting(), null);
-		}
-	}
-
-	@Provides
-	SlayerMasterConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(SlayerMasterConfig.class);
-	}
+    @Provides
+    SlayerMasterConfig provideConfig(ConfigManager configManager)
+    {
+        return configManager.getConfig(SlayerMasterConfig.class);
+    }
 }

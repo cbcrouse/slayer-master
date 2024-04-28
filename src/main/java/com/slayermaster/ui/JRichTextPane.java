@@ -1,4 +1,4 @@
-package com.slayermaster;
+package com.slayermaster.ui;
 
 import java.awt.Desktop;
 import java.io.IOException;

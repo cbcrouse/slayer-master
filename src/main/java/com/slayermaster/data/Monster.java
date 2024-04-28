@@ -1,6 +1,4 @@
-package com.slayermaster;
-
-import java.util.List;
+package com.slayermaster.data;
 
 public class Monster
 {

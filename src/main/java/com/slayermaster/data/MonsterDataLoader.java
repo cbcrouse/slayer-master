@@ -1,4 +1,4 @@
-package com.slayermaster;
+package com.slayermaster.data;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
+
 import net.runelite.client.RuneLite;
 
 public class MonsterDataLoader

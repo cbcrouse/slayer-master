@@ -1,4 +1,4 @@
-package com.slayermaster.osrswiki;
+package com.slayermaster.api;
 
 import java.util.Optional;
 

@@ -1,6 +1,4 @@
-package com.slayermaster;
-
-import com.slayermaster.osrswiki.WikiScraper;
+package com.slayermaster.data;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -10,11 +8,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 public class ImageCacheManager
 {
-    private MonsterImageManager imageManager = new MonsterImageManager();
+    private final MonsterImageManager imageManager = new MonsterImageManager();
     private static final String CACHE_DIR = "imageCache/";
 
     public ImageCacheManager()
@@ -27,12 +24,12 @@ public class ImageCacheManager
         }
     }
 
-    public ImageIcon getCachedImage(String monsterName)
+    public ImageIcon getCachedMonsterImage(String monsterName)
     {
-        return getCachedImage(monsterName, 25);
+        return getCachedMonsterImage(monsterName, 25);
     }
 
-    public ImageIcon getCachedImage(String monsterName, int maxWidth)
+    public ImageIcon getCachedMonsterImage(String monsterName, int maxWidth)
     {
         try
         {

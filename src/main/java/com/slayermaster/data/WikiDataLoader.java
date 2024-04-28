@@ -1,16 +1,16 @@
-package com.slayermaster;
+package com.slayermaster.data;
 
-import com.slayermaster.osrswiki.SlayerAssignment;
-import com.slayermaster.osrswiki.WikiScraper;
+import com.slayermaster.api.SlayerAssignment;
+import com.slayermaster.api.OSRSWikiScraper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WikiDataLoader
 {
-    private WikiScraper wikiScraper;
+    private OSRSWikiScraper wikiScraper;
 
-    public WikiDataLoader(WikiScraper wikiScraper)
+    public WikiDataLoader(OSRSWikiScraper wikiScraper)
     {
         this.wikiScraper = wikiScraper;
     }
