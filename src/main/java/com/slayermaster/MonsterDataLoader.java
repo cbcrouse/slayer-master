@@ -25,4 +25,3 @@ public class MonsterDataLoader
         return gson.fromJson(reader, monsterListType);
     }
 }
-

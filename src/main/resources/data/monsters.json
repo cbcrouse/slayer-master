@@ -2,7 +2,8 @@
   {
     "name": "Aberrant spectre",
     "locations": ["Slayer Tower", "Catacombs of Kourend"],
-    "recommendedLocation": "Slayer Tower",
+    "recommendedLocation": "Catacombs of Kourend",
+    "alternatives": ["Deviant spectre"],
     "requiredItems": ["Nose peg or Slayer helmet"],
     "recommendedGear": "Magic gear",
     "attackStyle": "Magic"
@@ -11,6 +12,7 @@
     "name": "Banshee",
     "locations": ["Slayer Tower"],
     "recommendedLocation": "Slayer Tower",
+    "alternatives": [],
     "requiredItems": ["Earmuffs or Slayer helmet"],
     "recommendedGear": "Ranged gear",
     "attackStyle": "Ranged"
@@ -19,14 +21,16 @@
     "name": "Blue Dragon",
     "locations": ["Taverley Dungeon", "Ogre Enclave", "Myth's Guild Dungeon"],
     "recommendedLocation": "Taverley Dungeon",
+    "alternatives": [],
     "requiredItems": ["Anti-dragon shield", "Dragonfire potion"],
     "recommendedGear": "Stab weapons",
     "attackStyle": "Melee"
   },
   {
     "name": "Drake",
-    "locations": ["Karumja Slayer Dungeon"],
-    "recommendedLocation": "Karumja Slayer Dungeon",
+    "locations": ["Karamja Slayer Dungeon"],
+    "recommendedLocation": "Karamja Slayer Dungeon",
+    "alternatives": [],
     "requiredItems": ["Boots of stone", "Boots of brimstone or Granite boots"],
     "recommendedGear": "Ranged or Melee gear",
     "attackStyle": "Hybrid"

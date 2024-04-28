@@ -1,5 +1,6 @@
 package com.slayermaster;
 
+import com.slayermaster.osrswiki.WikiScraper;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.PluginPanel;
 
@@ -10,6 +11,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SlayerMasterPanel extends PluginPanel
@@ -23,6 +25,8 @@ public class SlayerMasterPanel extends PluginPanel
 
     private SpriteManager spriteManager;
     private MonsterImageManager imageManager;
+
+    private WikiDataLoader wikiDataLoader = new WikiDataLoader(new WikiScraper());
 
     public SlayerMasterPanel(SpriteManager spriteManager)
     {
@@ -83,12 +87,10 @@ public class SlayerMasterPanel extends PluginPanel
 
     private void initializeMonsterDetails()
     {
-        MonsterDataLoader dataLoader = new MonsterDataLoader();
-        // Load the monster data using the data loader
-        var monsters = dataLoader.loadMonsterData();  // Assuming this returns some collection of Monster objects
+        List<Monster> wikiMonsters = wikiDataLoader.getWikiSlayerMonsters();
 
         // Iterate over each monster and add it to the monsterDetails map
-        for (var monster : monsters) {
+        for (var monster : wikiMonsters) {
             monsterDetails.put(monster.getName(), monster);
         }
     }
@@ -107,6 +109,11 @@ public class SlayerMasterPanel extends PluginPanel
             {
                 details.append("- ").append(location).append("\n");
             }
+        }
+        details.append("Alternatives:\n");
+        for (String alternative : monster.getAlternatives())
+        {
+            details.append("- ").append(alternative).append("\n");
         }
         details.append("Required Items: ").append(String.join(", ", monster.getRequiredItems())).append("\n");
         details.append("Recommended Gear: ").append(monster.getRecommendedGear()).append("\n");
@@ -155,6 +162,7 @@ public class SlayerMasterPanel extends PluginPanel
 
     private void setupMonsterList()
     {
+        ImageCacheManager imageCacheManager = new ImageCacheManager();
         monsterList.setCellRenderer(new DefaultListCellRenderer()
         {
             @Override
@@ -163,7 +171,8 @@ public class SlayerMasterPanel extends PluginPanel
                 JLabel label = new JLabel(value.toString());
 
                 // Use the image manager to get the icon
-                ImageIcon icon = imageManager.getThumbnailIcon(value.toString());
+                ImageIcon icon = imageCacheManager.getCachedImage(value.toString());
+//                ImageIcon icon = imageManager.getThumbnailIcon(value.toString());
                 if (icon != null)
                 {
                     JLabel iconLabel = new JLabel(icon);
