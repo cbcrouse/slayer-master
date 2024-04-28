@@ -5,14 +5,12 @@ import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.PluginPanel;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class SlayerMasterPanel extends PluginPanel
 {
@@ -20,11 +18,15 @@ public class SlayerMasterPanel extends PluginPanel
     private JPanel cardPanel;
     private DefaultListModel<String> monsterListModel;
     private JList<String> monsterList;
-    private JTextArea detailTextArea;
     private Map<String, Monster> monsterDetails;
 
+    private JLabel detailsImageLabel = new JLabel();
+    private JLabel detailsNameLabel = new JLabel();
+    private JTextPane detailsTextPane = new JTextPane();
+
     private SpriteManager spriteManager;
-    private MonsterImageManager imageManager;
+    private MonsterImageManager imageManager = new MonsterImageManager();
+    private ImageCacheManager imageCacheManager = new ImageCacheManager();
 
     private WikiDataLoader wikiDataLoader = new WikiDataLoader(new WikiScraper());
 
@@ -89,35 +91,65 @@ public class SlayerMasterPanel extends PluginPanel
     {
         List<Monster> wikiMonsters = wikiDataLoader.getWikiSlayerMonsters();
 
-        // Iterate over each monster and add it to the monsterDetails map
+        // Sort the wikiMonsters list alphabetically by monster name
+        wikiMonsters.sort(Comparator.comparing(Monster::getName));
+
+        // Use a TreeMap to maintain the order
+        Map<String, Monster> sortedMonsterDetails = new TreeMap<>();
+
+        // Iterate over each sorted monster and add it to the sortedMonsterDetails map
         for (var monster : wikiMonsters) {
-            monsterDetails.put(monster.getName(), monster);
+            sortedMonsterDetails.put(monster.getName(), monster);
         }
+
+        // Now monsterDetails will have all monsters in alphabetical order
+        monsterDetails = sortedMonsterDetails;
     }
 
     private String getMonsterDetails(Monster monster)
     {
-        StringBuilder details = new StringBuilder();
-        details.append("Name: ").append(monster.getName()).append("\n");
-        details.append("Locations:\n");
-        for (String location : monster.getLocations())
-        {
-            if (location.equals(monster.getRecommendedLocation()))
-            {
-                details.append("* Recommended: ").append(location).append("\n");
-            } else
-            {
-                details.append("- ").append(location).append("\n");
+        // Set the monster's image and name
+        ImageIcon monsterImage = imageCacheManager.getCachedImage(monster.getName());
+        ImageIcon resizedImage = imageManager.resizeIcon(monsterImage, 100);
+        detailsImageLabel.setIcon(resizedImage);
+        detailsImageLabel.setHorizontalAlignment(JLabel.CENTER);
+        detailsNameLabel.setText(monster.getName());
+        detailsNameLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        // Build the details string with HTML for styling
+        StringBuilder details = new StringBuilder("<html>");
+        details.append("<div style='text-align: center;'><h1>").append(monster.getName()).append("</h1><hr></div>");
+
+        // Append locations
+        details.append("<div style='text-align: left; margin-left: 20px;'>")
+                .append("<h2>Locations:</h2>");
+        for (String location : monster.getLocations()) {
+            details.append("- ").append(location).append("<br>");
+        }
+
+        // Append alternatives if available
+        if (monster.getAlternatives().length > 0) {
+            details.append("<h2>Alternatives:</h2>");
+            for (String alternative : monster.getAlternatives()) {
+                details.append("- ").append(alternative).append("<br>");
             }
         }
-        details.append("Alternatives:\n");
-        for (String alternative : monster.getAlternatives())
-        {
-            details.append("- ").append(alternative).append("\n");
+
+        // Append required items if not empty and not "N/A"
+        if (monster.getRequiredItems().length > 0 && !Arrays.asList(monster.getRequiredItems()).contains("N/A")) {
+            details.append("<h2>Required Items:</h2>")
+                    .append(String.join(", ", monster.getRequiredItems())).append("<br>");
         }
-        details.append("Required Items: ").append(String.join(", ", monster.getRequiredItems())).append("\n");
-        details.append("Recommended Gear: ").append(monster.getRecommendedGear()).append("\n");
-        details.append("Attack Style: ").append(monster.getAttackStyle()).append("\n");
+
+        // Append recommended gear if not "N/A"
+        if (!"N/A".equalsIgnoreCase(monster.getRecommendedGear())) {
+            details.append("<h2>Recommended Gear:</h2>").append(monster.getRecommendedGear()).append("<br>");
+        }
+
+        // Append attack style
+        details.append("<h2>Attack Style:</h2>").append(monster.getAttackStyle())
+                .append("</div></html>");
+
         return details.toString();
     }
 
@@ -151,18 +183,29 @@ public class SlayerMasterPanel extends PluginPanel
     private void setupDetailPanel()
     {
         JPanel detailPanel = new JPanel(new BorderLayout());
-        detailTextArea = new JTextArea();
-        detailTextArea.setEditable(false);
-        detailPanel.add(new JScrollPane(detailTextArea), BorderLayout.CENTER);
+        detailPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        detailsTextPane = new JTextPane();
+        detailsTextPane.setContentType("text/html");  // Set content type to HTML
+        detailsTextPane.setEditable(false);
+        detailsTextPane.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        JScrollPane scrollPane = new JScrollPane(detailsTextPane);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "List"));
+
+        detailPanel.add(detailsImageLabel, BorderLayout.NORTH);
+        detailPanel.add(scrollPane, BorderLayout.CENTER);
         detailPanel.add(backButton, BorderLayout.SOUTH);
+
         cardPanel.add(detailPanel, "Details");
     }
 
     private void setupMonsterList()
     {
         ImageCacheManager imageCacheManager = new ImageCacheManager();
+        monsterList.setCursor(new Cursor(Cursor.HAND_CURSOR));
         monsterList.setCellRenderer(new DefaultListCellRenderer()
         {
             @Override
@@ -170,48 +213,40 @@ public class SlayerMasterPanel extends PluginPanel
                 JPanel panel = new JPanel(new BorderLayout());
                 JLabel label = new JLabel(value.toString());
 
-                // Use the image manager to get the icon
                 ImageIcon icon = imageCacheManager.getCachedImage(value.toString());
-//                ImageIcon icon = imageManager.getThumbnailIcon(value.toString());
-                if (icon != null)
-                {
-                    JLabel iconLabel = new JLabel(icon);
-                    iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5)); // Add padding around the icon
-                    panel.add(iconLabel, BorderLayout.EAST); // Icon on the right
-                }
+                ImageIcon resizedIcon = imageManager.resizeIcon(icon, 25);
+                JLabel iconLabel = new JLabel(resizedIcon);
+                iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+                panel.add(iconLabel, BorderLayout.EAST);
 
-                label.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding around text
+                label.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
                 panel.add(label, BorderLayout.CENTER);
                 panel.setToolTipText(value.toString());
                 panel.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
                 label.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
 
-                // Add mouse listener to the panel for showing details
-                panel.addMouseListener(new MouseAdapter() {
-                    public void mouseClicked(MouseEvent e) {
-                        Monster details = monsterDetails.get(value.toString());
-                        detailTextArea.setText(getMonsterDetails(details));
-                        cardLayout.show(cardPanel, "Details");
-                    }
-                });
-
-                // Adding padding around each list cell
-                panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+                panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.GRAY));
 
                 return panel;
             }
         });
 
-        monsterList.addListSelectionListener(e ->
-        {
+        monsterList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 String selectedMonster = monsterList.getSelectedValue();
-                if (selectedMonster != null) {
+                if (selectedMonster != null && monsterDetails.containsKey(selectedMonster)) {
                     Monster details = monsterDetails.get(selectedMonster);
-                    detailTextArea.setText(getMonsterDetails(details));
-                    cardLayout.show(cardPanel, "Details");
+                    if (details != null && detailsTextPane != null) {
+                        detailsTextPane.setText(getMonsterDetails(details));
+                        cardLayout.show(cardPanel, "Details");
+                    } else {
+                        System.out.println("Details not found or detailTextArea is not initialized");
+                    }
+                } else {
+                    System.out.println("Selected monster is null or not found in monsterDetails");
                 }
             }
         });
+
     }
 }

@@ -57,7 +57,7 @@ public class ImageCacheManager
                 ImageIO.write((RenderedImage) imageIcon.getImage(), "png", outputFile);
             }
 
-            return imageManager.resizeIconByWidth(imageIcon, maxWidth);
+            return imageIcon;
         } catch (IOException e)
         {
             e.printStackTrace();
