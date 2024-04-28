@@ -1,6 +1,6 @@
 package com.slayermaster.ui;
 
-import com.slayermaster.data.Monster;
+import com.slayermaster.api.SlayerAssignment;
 import net.runelite.client.game.SpriteManager;
 
 import javax.swing.*;
@@ -15,11 +15,11 @@ public class MonsterListPanel extends JPanel
     private final int hoveredIndex = -1;
     private JList<String> monsterList;
     private final MonsterSelectionListener selectionListener;
-    private final Map<String, Monster> monsterDetails;
+    private final Map<String, SlayerAssignment> assignmentDetails;
 
-    public MonsterListPanel(Map<String, Monster> monsterDetails, SpriteManager spriteManager, MonsterSelectionListener selectionListener)
+    public MonsterListPanel(Map<String, SlayerAssignment> assignmentDetails, SpriteManager spriteManager, MonsterSelectionListener selectionListener)
     {
-        this.monsterDetails = monsterDetails;
+        this.assignmentDetails = assignmentDetails;
         this.spriteManager = spriteManager;
         this.selectionListener = selectionListener;
         setLayout(new BorderLayout());
@@ -29,10 +29,10 @@ public class MonsterListPanel extends JPanel
     public void initializeComponents()
     {
         DefaultListModel<String> monsterListModel = new DefaultListModel<>();
-        monsterDetails.keySet().forEach(monsterListModel::addElement);
+        assignmentDetails.keySet().forEach(monsterListModel::addElement);
 
         monsterList = new JList<>(monsterListModel);
-        monsterList.setCellRenderer(new MonsterListCellRenderer(monsterDetails));
+        monsterList.setCellRenderer(new MonsterListCellRenderer(assignmentDetails));
         JScrollPane scrollPane = new JScrollPane(monsterList);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -50,7 +50,7 @@ public class MonsterListPanel extends JPanel
     private void filterMonsters(String text)
     {
         DefaultListModel<String> filteredModel = new DefaultListModel<>();
-        monsterDetails.keySet().stream()
+        assignmentDetails.keySet().stream()
                 .filter(name -> name.toLowerCase().contains(text))
                 .forEach(filteredModel::addElement);
         monsterList.setModel(filteredModel);
@@ -59,7 +59,7 @@ public class MonsterListPanel extends JPanel
     private void setupMonsterList()
     {
         monsterList.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        MonsterListCellRenderer renderer = new MonsterListCellRenderer(monsterDetails);
+        MonsterListCellRenderer renderer = new MonsterListCellRenderer(assignmentDetails);
         monsterList.setCellRenderer(renderer);
 
         monsterList.addMouseMotionListener(new MouseAdapter()
@@ -81,7 +81,7 @@ public class MonsterListPanel extends JPanel
             if (!e.getValueIsAdjusting() && !monsterList.isSelectionEmpty())
             {
                 String selectedMonster = monsterList.getSelectedValue();
-                Monster details = monsterDetails.get(selectedMonster);
+                SlayerAssignment details = assignmentDetails.get(selectedMonster);
                 if (details != null)
                 {
                     selectionListener.onMonsterSelected(details);

@@ -1,7 +1,7 @@
 package com.slayermaster;
 
 import com.slayermaster.api.OSRSWikiScraper;
-import com.slayermaster.data.Monster;
+import com.slayermaster.api.SlayerAssignment;
 import com.slayermaster.data.WikiDataLoader;
 import com.slayermaster.ui.MonsterListPanel;
 import com.slayermaster.ui.MonsterDetailPanel;
@@ -19,7 +19,7 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
 {
     private CardLayout cardLayout;
     private JPanel cardPanel;
-    private Map<String, Monster> monsterDetails;
+    private Map<String, SlayerAssignment> monsterDetails;
 
     private final WikiDataLoader wikiDataLoader = new WikiDataLoader(new OSRSWikiScraper());
 
@@ -53,18 +53,18 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
 
     private void initializeMonsterDetails()
     {
-        List<Monster> wikiMonsters = wikiDataLoader.getWikiSlayerMonsters();
+        List<SlayerAssignment> wikiMonsters = wikiDataLoader.getWikiSlayerMonsters();
 
         // Sort the wikiMonsters list alphabetically by monster name
-        wikiMonsters.sort(Comparator.comparing(Monster::getName));
+        wikiMonsters.sort(Comparator.comparing(SlayerAssignment::getMonsterName));
 
         // Use a TreeMap to maintain the order
-        Map<String, Monster> sortedMonsterDetails = new TreeMap<>();
+        Map<String, SlayerAssignment> sortedMonsterDetails = new TreeMap<>();
 
         // Iterate over each sorted monster and add it to the sortedMonsterDetails map
         for (var monster : wikiMonsters)
         {
-            sortedMonsterDetails.put(monster.getName(), monster);
+            sortedMonsterDetails.put(monster.getMonsterName(), monster);
         }
 
         // Now monsterDetails will have all monsters in alphabetical order
@@ -78,9 +78,9 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
     }
 
     @Override
-    public void onMonsterSelected(Monster monster)
+    public void onMonsterSelected(SlayerAssignment slayerAssignment)
     {
-        detailPanel.setMonsterDetails(monster);
+        detailPanel.setMonsterDetails(slayerAssignment);
         showPanel("Details");
     }
 }
