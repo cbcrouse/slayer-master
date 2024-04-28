@@ -9,6 +9,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class SlayerMasterPanel extends PluginPanel
     private JLabel detailsImageLabel = new JLabel();
     private JLabel detailsNameLabel = new JLabel();
     private JTextPane detailsTextPane = new JTextPane();
+    private int hoveredIndex = -1;
 
     private SpriteManager spriteManager;
     private MonsterImageManager imageManager = new MonsterImageManager();
@@ -32,7 +35,8 @@ public class SlayerMasterPanel extends PluginPanel
 
     public SlayerMasterPanel(SpriteManager spriteManager)
     {
-        if (spriteManager == null) {
+        if (spriteManager == null)
+        {
             System.out.println("SpriteManager not initialized");
             return; // or handle the case more gracefully
         }
@@ -69,12 +73,25 @@ public class SlayerMasterPanel extends PluginPanel
                 BorderFactory.createEmptyBorder(0, 5, 0, 5)));
 
         // Search field search filter
-        searchField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { filter(); }
-            public void removeUpdate(DocumentEvent e) { filter(); }
-            public void changedUpdate(DocumentEvent e) { filter(); }
+        searchField.getDocument().addDocumentListener(new DocumentListener()
+        {
+            public void insertUpdate(DocumentEvent e)
+            {
+                filter();
+            }
 
-            private void filter() {
+            public void removeUpdate(DocumentEvent e)
+            {
+                filter();
+            }
+
+            public void changedUpdate(DocumentEvent e)
+            {
+                filter();
+            }
+
+            private void filter()
+            {
                 String text = searchField.getText().trim().toLowerCase();
                 DefaultListModel<String> filteredModel = new DefaultListModel<>();
                 monsterDetails.keySet().stream()
@@ -98,7 +115,8 @@ public class SlayerMasterPanel extends PluginPanel
         Map<String, Monster> sortedMonsterDetails = new TreeMap<>();
 
         // Iterate over each sorted monster and add it to the sortedMonsterDetails map
-        for (var monster : wikiMonsters) {
+        for (var monster : wikiMonsters)
+        {
             sortedMonsterDetails.put(monster.getName(), monster);
         }
 
@@ -123,26 +141,31 @@ public class SlayerMasterPanel extends PluginPanel
         // Append locations
         details.append("<div style='text-align: left; margin-left: 20px;'>")
                 .append("<h2>Locations:</h2>");
-        for (String location : monster.getLocations()) {
+        for (String location : monster.getLocations())
+        {
             details.append("- ").append(location).append("<br>");
         }
 
         // Append alternatives if available
-        if (monster.getAlternatives().length > 0) {
+        if (monster.getAlternatives().length > 0)
+        {
             details.append("<h2>Alternatives:</h2>");
-            for (String alternative : monster.getAlternatives()) {
+            for (String alternative : monster.getAlternatives())
+            {
                 details.append("- ").append(alternative).append("<br>");
             }
         }
 
         // Append required items if not empty and not "N/A"
-        if (monster.getRequiredItems().length > 0 && !Arrays.asList(monster.getRequiredItems()).contains("N/A")) {
+        if (monster.getRequiredItems().length > 0 && !Arrays.asList(monster.getRequiredItems()).contains("N/A"))
+        {
             details.append("<h2>Required Items:</h2>")
                     .append(String.join(", ", monster.getRequiredItems())).append("<br>");
         }
 
         // Append recommended gear if not "N/A"
-        if (!"N/A".equalsIgnoreCase(monster.getRecommendedGear())) {
+        if (!"N/A".equalsIgnoreCase(monster.getRecommendedGear()))
+        {
             details.append("<h2>Recommended Gear:</h2>").append(monster.getRecommendedGear()).append("<br>");
         }
 
@@ -183,7 +206,7 @@ public class SlayerMasterPanel extends PluginPanel
     private void setupDetailPanel()
     {
         JPanel detailPanel = new JPanel(new BorderLayout());
-        detailPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        detailPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         detailsTextPane = new JTextPane();
         detailsTextPane.setContentType("text/html");  // Set content type to HTML
@@ -195,9 +218,13 @@ public class SlayerMasterPanel extends PluginPanel
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "List"));
 
+        JPanel spacerPanel = new JPanel();
+        spacerPanel.setPreferredSize(new Dimension(0, 20)); // Create a spacer panel 20 pixels high
+
         detailPanel.add(detailsImageLabel, BorderLayout.NORTH);
         detailPanel.add(scrollPane, BorderLayout.CENTER);
-        detailPanel.add(backButton, BorderLayout.SOUTH);
+        detailPanel.add(spacerPanel, BorderLayout.SOUTH);
+        detailPanel.add(backButton, BorderLayout.PAGE_END);
 
         cardPanel.add(detailPanel, "Details");
     }
@@ -209,7 +236,8 @@ public class SlayerMasterPanel extends PluginPanel
         monsterList.setCellRenderer(new DefaultListCellRenderer()
         {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus)
+            {
                 JPanel panel = new JPanel(new BorderLayout());
                 JLabel label = new JLabel(value.toString());
 
@@ -222,27 +250,50 @@ public class SlayerMasterPanel extends PluginPanel
                 label.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
                 panel.add(label, BorderLayout.CENTER);
                 panel.setToolTipText(value.toString());
-                panel.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
-                label.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
+
+                if (isSelected) {
+                    panel.setBackground(list.getSelectionBackground());
+                    label.setForeground(list.getSelectionForeground());
+                } else {
+                    panel.setBackground(index == hoveredIndex ? new Color(0x555555) : list.getBackground());
+                    label.setForeground(list.getForeground());
+                }
 
                 panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.GRAY));
-
                 return panel;
             }
         });
 
-        monsterList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
+        // Adding mouse listener to handle hover effect
+        monsterList.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int index = monsterList.locationToIndex(e.getPoint());
+                if (index != hoveredIndex) {
+                    hoveredIndex = index;
+                    monsterList.repaint();
+                }
+            }
+        });
+
+        monsterList.addListSelectionListener(e ->
+        {
+            if (!e.getValueIsAdjusting())
+            {
                 String selectedMonster = monsterList.getSelectedValue();
-                if (selectedMonster != null && monsterDetails.containsKey(selectedMonster)) {
+                if (selectedMonster != null && monsterDetails.containsKey(selectedMonster))
+                {
                     Monster details = monsterDetails.get(selectedMonster);
-                    if (details != null && detailsTextPane != null) {
+                    if (details != null && detailsTextPane != null)
+                    {
                         detailsTextPane.setText(getMonsterDetails(details));
                         cardLayout.show(cardPanel, "Details");
-                    } else {
+                    } else
+                    {
                         System.out.println("Details not found or detailTextArea is not initialized");
                     }
-                } else {
+                } else
+                {
                     System.out.println("Selected monster is null or not found in monsterDetails");
                 }
             }
