@@ -107,8 +107,19 @@ public class MonsterDetailPanel extends JPanel
         }
 
         // Append attack style
-        details.append("<h2>Attack Style:</h2>").append(slayerAssignment.getAttackStyle())
-                .append("</div></html>");
+        details.append("<h2>Attack Style:</h2>").append(slayerAssignment.getAttackStyle());
+
+        // Append attribute
+        details.append("<h2>Attribute:</h2>").append(slayerAssignment.getAttribute());
+
+        // Append slayer masters
+        details.append("<h2>Slayer Masters:</h2>");
+        for (String master : slayerAssignment.getSlayerMasters())
+        {
+            details.append("- ").append(master).append("<br>");
+        }
+
+        details.append("</div></html>");
 
         return details.toString();
     }
