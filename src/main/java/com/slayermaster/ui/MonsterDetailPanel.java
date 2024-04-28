@@ -64,47 +64,50 @@ public class MonsterDetailPanel extends JPanel
         detailsNameLabel.setText(currentMonster.getMonsterName());
     }
 
-    private String getMonsterDetails(SlayerAssignment monster)
+    private String getMonsterDetails(SlayerAssignment slayerAssignment)
     {
         // Set the monster's image and name
-        ImageIcon monsterImage = imageCacheManager.getCachedMonsterImage(monster.getMonsterName());
+        ImageIcon monsterImage = imageCacheManager.getCachedMonsterImage(slayerAssignment.getMonsterName());
         ImageIcon resizedImage = imageManager.resizeIcon(monsterImage, 100);
         detailsImageLabel.setIcon(resizedImage);
         detailsImageLabel.setHorizontalAlignment(JLabel.CENTER);
-        detailsNameLabel.setText(monster.getMonsterName());
+        detailsNameLabel.setText(slayerAssignment.getMonsterName());
         detailsNameLabel.setHorizontalAlignment(JLabel.CENTER);
 
         // Build the details string with HTML for styling
         StringBuilder details = new StringBuilder("<html>");
-        details.append("<div style='text-align: center;'><h1>").append(monster.getMonsterName()).append("</h1><hr></div>");
+        details.append("<div style='text-align: center;'><h1>").append(slayerAssignment.getMonsterName()).append("</h1><hr></div>");
+        details.append("<div style='text-align: left; margin-left: 20px;'>");
+        // Append required level
+        details.append("<h2>Slayer level:</h2>");
+        details.append("- ").append(slayerAssignment.getSlayerLevel()).append("<br>");
 
         // Append locations
-        details.append("<div style='text-align: left; margin-left: 20px;'>")
-                .append("<h2>Locations:</h2>");
-        for (String location : monster.getLocations())
+        details.append("<h2>Locations:</h2>");
+        for (String location : slayerAssignment.getLocations())
         {
             details.append("- ").append(location).append("<br>");
         }
 
         // Append alternatives if available
-        if (monster.getAlternatives().length > 0)
+        if (slayerAssignment.getAlternatives().length > 0)
         {
             details.append("<h2>Alternatives:</h2>");
-            for (String alternative : monster.getAlternatives())
+            for (String alternative : slayerAssignment.getAlternatives())
             {
                 details.append("- ").append(alternative).append("<br>");
             }
         }
 
         // Append required items if not empty and not "N/A"
-        if (monster.getRequiredItems().length > 0 && !Arrays.asList(monster.getRequiredItems()).contains("N/A"))
+        if (slayerAssignment.getRequiredItems().length > 0 && !Arrays.asList(slayerAssignment.getRequiredItems()).contains("N/A"))
         {
             details.append("<h2>Required Items:</h2>")
-                    .append(String.join(", ", monster.getRequiredItems())).append("<br>");
+                    .append(String.join(", ", slayerAssignment.getRequiredItems())).append("<br>");
         }
 
         // Append attack style
-        details.append("<h2>Attack Style:</h2>").append(monster.getAttackStyle())
+        details.append("<h2>Attack Style:</h2>").append(slayerAssignment.getAttackStyle())
                 .append("</div></html>");
 
         return details.toString();
