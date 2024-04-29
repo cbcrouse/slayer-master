@@ -1,5 +1,6 @@
 package com.slayermaster.api;
 
+import net.runelite.api.Skill;
 import net.runelite.api.Client;
 import net.runelite.api.EnumID;
 import net.runelite.api.VarPlayer;
@@ -12,6 +13,13 @@ public class RuneLiteApi
     public RuneLiteApi(Client client)
     {
         this.client = client;
+    }
+
+    public int getCurrentSlayerLevel() {
+        if (client != null) {
+            return client.getRealSkillLevel(Skill.SLAYER);
+        }
+        return -1; // Return -1 or any other appropriate error indicator if the client is not available
     }
 
     public CurrentSlayerTask getCurrentSlayerTask()

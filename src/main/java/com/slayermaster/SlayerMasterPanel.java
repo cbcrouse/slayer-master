@@ -43,7 +43,7 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
         currentTaskPanel = new CurrentTaskPanel(runeLiteApi, eventBus);
         add(currentTaskPanel, BorderLayout.NORTH); // Always visible at the top
 
-        listPanel = new MonsterListPanel(monsterDetails, spriteManager, this);
+        listPanel = new MonsterListPanel(monsterDetails, spriteManager, this, runeLiteApi, eventBus);
         detailPanel = new MonsterDetailPanel(this);
         cardPanel.add(listPanel, "List");
         cardPanel.add(detailPanel, "Details");

@@ -1,6 +1,12 @@
 package com.slayermaster.ui;
 
+import com.slayermaster.api.RuneLiteApi;
 import com.slayermaster.api.SlayerAssignment;
+import com.slayermaster.events.SlayerTaskUpdatedEvent;
+import net.runelite.api.ChatMessageType;
+import net.runelite.api.events.ChatMessage;
+import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SpriteManager;
 
 import javax.swing.*;
@@ -13,26 +19,39 @@ public class MonsterListPanel extends JPanel
 {
     private final SpriteManager spriteManager;
     private final int hoveredIndex = -1;
+    private final RuneLiteApi runeLiteApi;
     private JList<String> monsterList;
     private final MonsterSelectionListener selectionListener;
     private final Map<String, SlayerAssignment> assignmentDetails;
+    private int currentSlayerLevel = -1;
 
-    public MonsterListPanel(Map<String, SlayerAssignment> assignmentDetails, SpriteManager spriteManager, MonsterSelectionListener selectionListener)
+    public MonsterListPanel(
+            Map<String, SlayerAssignment> assignmentDetails,
+            SpriteManager spriteManager,
+            MonsterSelectionListener selectionListener,
+            RuneLiteApi runeLiteApi,
+            EventBus eventBus)
     {
         this.assignmentDetails = assignmentDetails;
         this.spriteManager = spriteManager;
         this.selectionListener = selectionListener;
+        this.runeLiteApi = runeLiteApi;
         setLayout(new BorderLayout());
         initializeComponents();
+
+        // Register panel to listen to events
+        eventBus.register(this);
     }
 
-    public void initializeComponents()
+    private void initializeComponents()
     {
+        currentSlayerLevel = runeLiteApi.getCurrentSlayerLevel();
+
         DefaultListModel<String> monsterListModel = new DefaultListModel<>();
         assignmentDetails.keySet().forEach(monsterListModel::addElement);
 
         monsterList = new JList<>(monsterListModel);
-        monsterList.setCellRenderer(new MonsterListCellRenderer(assignmentDetails));
+        monsterList.setCellRenderer(new MonsterListCellRenderer(assignmentDetails, currentSlayerLevel));
         JScrollPane scrollPane = new JScrollPane(monsterList);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -46,6 +65,19 @@ public class MonsterListPanel extends JPanel
         setupMonsterList();
     }
 
+    public void updateSlayerLevel()
+    {
+        this.currentSlayerLevel = runeLiteApi.getCurrentSlayerLevel();  // Fetch the updated level
+        monsterList.setCellRenderer(new MonsterListCellRenderer(assignmentDetails, currentSlayerLevel));  // Set a new renderer with updated level
+        monsterList.repaint();  // Refresh the list to reflect changes
+    }
+
+
+    @Subscribe
+    public void onSlayerTaskUpdatedEvent(SlayerTaskUpdatedEvent event)
+    {
+        updateSlayerLevel();
+    }
 
     private void filterMonsters(String text)
     {
@@ -59,7 +91,7 @@ public class MonsterListPanel extends JPanel
     private void setupMonsterList()
     {
         monsterList.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        MonsterListCellRenderer renderer = new MonsterListCellRenderer(assignmentDetails);
+        MonsterListCellRenderer renderer = new MonsterListCellRenderer(assignmentDetails, currentSlayerLevel);
         monsterList.setCellRenderer(renderer);
 
         monsterList.addMouseMotionListener(new MouseAdapter()
