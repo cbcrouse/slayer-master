@@ -3,8 +3,6 @@ package com.slayermaster.ui;
 import com.slayermaster.api.RuneLiteApi;
 import com.slayermaster.api.SlayerAssignment;
 import com.slayermaster.events.SlayerTaskUpdatedEvent;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.events.ChatMessage;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SpriteManager;
@@ -13,10 +11,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.Map;
 
 public class MonsterListPanel extends JPanel
 {
+    private JComboBox<String> filterComboBox;
+    private JComboBox<String> sortComboBox;
     private final SpriteManager spriteManager;
     private final int hoveredIndex = -1;
     private final RuneLiteApi runeLiteApi;
@@ -49,20 +50,63 @@ public class MonsterListPanel extends JPanel
     {
         currentSlayerLevel = runeLiteApi.getCurrentSlayerLevel();
 
-        monsterListModel = new DefaultListModel<>();
-        assignmentDetails.keySet().forEach(monsterListModel::addElement);
+        // Initialize filter combo box
+        String[] filterOptions = new String[]{"Filter 1", "Filter 2", "Filter 3"}; // Add your filter options here
+        JComboBox<String> filterComboBox = new JComboBox<>(filterOptions);
 
-        monsterList = new JList<>(monsterListModel);
-        monsterList.setCellRenderer(new MonsterListCellRenderer(assignmentDetails, currentSlayerLevel));
-        JScrollPane scrollPane = new JScrollPane(monsterList);
-        add(scrollPane, BorderLayout.CENTER);
+        // Initialize sort combo box
+        String[] sortOptions = new String[]{"A-Z", "Z-A", "Slayer Level High->Low", "Slayer Level Low->High"}; // Add your sort options here
+        JComboBox<String> sortComboBox = new JComboBox<>(sortOptions);
 
+        // Initialize level combo box
+        Integer[] levelOptions = new Integer[99];
+        for (int i = 0; i < 99; i++)
+        {
+            levelOptions[i] = i + 1;
+        }
+        JComboBox<Integer> levelComboBox = new JComboBox<>(levelOptions);
+
+        // Create labels for combo boxes
+        JLabel filterLabel = new JLabel("Filter:");
+        JLabel sortLabel = new JLabel("Sort:");
+        JLabel levelLabel = new JLabel("Level:");
+
+        // Create panel for combo boxes
+        JPanel comboBoxPanel = new JPanel();
+        comboBoxPanel.setLayout(new GridLayout(0, 2, 5, 5)); // 2 columns with 5px horizontal and vertical gap
+        comboBoxPanel.add(filterLabel);
+        comboBoxPanel.add(filterComboBox);
+        comboBoxPanel.add(sortLabel);
+        comboBoxPanel.add(sortComboBox);
+        comboBoxPanel.add(levelLabel);
+        comboBoxPanel.add(levelComboBox);
+
+        // Add empty border around combo box panel
+        comboBoxPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Create spacer between combo box panel and search panel
+        JPanel spacerPanel = new JPanel();
+        spacerPanel.setPreferredSize(new Dimension(10, 10)); // Adjust spacer size as needed
+
+        // Add components to main panel
+        add(comboBoxPanel, BorderLayout.NORTH);
+        add(spacerPanel, BorderLayout.CENTER); // Spacer panel between combobox and search panel
+
+        // Initialize search field and panel
         JTextField searchField = new SearchTextField(20, spriteManager, this::filterMonsters, "Search...");
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
         searchPanel.add(searchField);
         searchPanel.add(Box.createRigidArea(new Dimension(0, 10))); // spacer
-        add(searchPanel, BorderLayout.NORTH);
+        add(searchPanel, BorderLayout.CENTER);
+
+        // Initialize monster list model and JList
+        monsterListModel = new DefaultListModel<>();
+        assignmentDetails.keySet().forEach(monsterListModel::addElement);
+        monsterList = new JList<>(monsterListModel);
+        monsterList.setCellRenderer(new MonsterListCellRenderer(assignmentDetails, currentSlayerLevel));
+        JScrollPane scrollPane = new JScrollPane(monsterList);
+        add(scrollPane, BorderLayout.SOUTH);
 
         setupMonsterList();
     }
