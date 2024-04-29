@@ -38,39 +38,50 @@ public class MonsterListCellRenderer extends DefaultListCellRenderer
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus)
     {
         JPanel panel = new JPanel(new BorderLayout());
-        JLabel label = new JLabel(value.toString());
-        label.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Get the slayer level and pad it with spaces
+        SlayerAssignment assignment = assignmentDetails.get(value.toString());
+        String slayerLevelString = assignment != null ? assignment.getSlayerLevel() : "0";
+        JLabel slayerLevelLabel = new JLabel(slayerLevelString);
+        slayerLevelLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Adjust padding as needed
+        slayerLevelLabel.setHorizontalAlignment(SwingConstants.LEFT); // Left-align the slayer level
+
+        // Set preferred width for slayerLevelLabel
+        slayerLevelLabel.setPreferredSize(new Dimension(40, slayerLevelLabel.getPreferredSize().height)); // Adjust width as needed
 
         // Set foreground color based on slayer level
         try
         {
-            SlayerAssignment assignment = assignmentDetails.get(value.toString());
-            int requiredLevel = Integer.parseInt(assignment.getSlayerLevel());
+            int requiredLevel = Integer.parseInt(slayerLevelString);
             if (currentSlayerLevel > 0 && requiredLevel > currentSlayerLevel)
             {
-                label.setForeground(Color.RED);
+                slayerLevelLabel.setForeground(Color.RED);
             } else
             {
-                label.setForeground(list.getForeground());
+                slayerLevelLabel.setForeground(list.getForeground());
             }
         } catch (NumberFormatException e)
         {
             // Log or handle parsing error
-            label.setForeground(Color.GRAY); // Set a default or error color
+            slayerLevelLabel.setForeground(Color.GRAY); // Set a default or error color
         }
 
-        panel.add(label, BorderLayout.CENTER);
+        panel.add(slayerLevelLabel, BorderLayout.WEST);
+
+        JLabel nameLabel = new JLabel(value.toString());
+        nameLabel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10)); // Adjust padding as needed
+
+        panel.add(nameLabel, BorderLayout.CENTER);
         panel.setToolTipText(value.toString());
+
         setupIcon(value.toString(), panel);
 
         if (isSelected)
         {
             panel.setBackground(list.getSelectionBackground());
-            // label.setForeground(list.getSelectionForeground());
         } else
         {
             panel.setBackground(index == hoveredIndex ? new Color(0x555555) : list.getBackground());
-            // label.setForeground(list.getForeground());
         }
 
         panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.GRAY));
