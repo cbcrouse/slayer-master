@@ -2,7 +2,7 @@ package com.slayermaster.ui;
 
 import com.slayermaster.api.SlayerAssignment;
 import com.slayermaster.data.ImageCacheManager;
-import com.slayermaster.data.MonsterImageManager;
+import com.slayermaster.data.ImageManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +12,7 @@ public class MonsterListCellRenderer extends DefaultListCellRenderer
 {
     private final Map<String, SlayerAssignment> assignmentDetails;
     private final ImageCacheManager imageCacheManager;
-    private final MonsterImageManager imageManager;
+    private final ImageManager imageManager;
     private int currentSlayerLevel;
     private int hoveredIndex = -1;
 
@@ -20,7 +20,7 @@ public class MonsterListCellRenderer extends DefaultListCellRenderer
     {
         this.assignmentDetails = assignmentDetails;
         this.imageCacheManager = new ImageCacheManager();
-        this.imageManager = new MonsterImageManager();
+        this.imageManager = new ImageManager();
         this.currentSlayerLevel = currentSlayerLevel;
     }
 

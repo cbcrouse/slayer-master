@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 
 public class ImageCacheManager
 {
-    private final MonsterImageManager imageManager = new MonsterImageManager();
+    private final ImageManager imageManager = new ImageManager();
     private static final String CACHE_DIR = "imageCache/";
 
     public ImageCacheManager()

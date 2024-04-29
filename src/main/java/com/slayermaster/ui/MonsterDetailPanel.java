@@ -6,12 +6,12 @@ import java.util.Arrays;
 
 import com.slayermaster.api.SlayerAssignment;
 import com.slayermaster.data.ImageCacheManager;
-import com.slayermaster.data.MonsterImageManager;
+import com.slayermaster.data.ImageManager;
 
 public class MonsterDetailPanel extends JPanel
 {
     private final ImageCacheManager imageCacheManager = new ImageCacheManager();
-    private final MonsterImageManager imageManager = new MonsterImageManager();
+    private final ImageManager imageManager = new ImageManager();
 
     private JTextPane detailsTextPane;
     private JLabel detailsImageLabel;

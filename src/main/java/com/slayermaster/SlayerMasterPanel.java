@@ -3,6 +3,7 @@ package com.slayermaster;
 import com.slayermaster.api.OSRSWikiScraper;
 import com.slayermaster.api.RuneLiteApi;
 import com.slayermaster.api.SlayerAssignment;
+import com.slayermaster.data.ImageManager;
 import com.slayermaster.data.WikiDataLoader;
 import com.slayermaster.ui.*;
 import net.runelite.client.eventbus.EventBus;
@@ -26,7 +27,7 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
     private MonsterListPanel listPanel;
     private MonsterDetailPanel detailPanel;
 
-    public SlayerMasterPanel(SpriteManager spriteManager, EventBus eventBus, RuneLiteApi runeLiteApi)
+    public SlayerMasterPanel(SpriteManager spriteManager, EventBus eventBus, RuneLiteApi runeLiteApi, ImageManager imageManager)
     {
         if (spriteManager == null || runeLiteApi == null || eventBus == null)
         {
@@ -40,7 +41,7 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
         monsterDetails = new HashMap<>();
         initializeMonsterDetails();
 
-        currentTaskPanel = new CurrentTaskPanel(runeLiteApi, eventBus);
+        currentTaskPanel = new CurrentTaskPanel(runeLiteApi, eventBus, imageManager);
         add(currentTaskPanel, BorderLayout.NORTH); // Always visible at the top
 
         listPanel = new MonsterListPanel(monsterDetails, spriteManager, this, runeLiteApi, eventBus);
