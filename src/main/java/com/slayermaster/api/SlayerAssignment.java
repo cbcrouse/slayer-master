@@ -55,10 +55,7 @@ public class SlayerAssignment
         return requiredItems;
     }
 
-    public String getAttribute()
-    {
-        return attribute;
-    }
+    public String getAttribute() { return attribute; }
 
     public String getAttackStyle()
     {

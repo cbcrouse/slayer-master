@@ -5,12 +5,15 @@ import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import javax.inject.Inject;
 
+import com.slayermaster.api.RuneLiteApi;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -30,9 +33,13 @@ public class SlayerMasterPlugin extends Plugin
 {
     private SlayerMasterPanel panel;
     private NavigationButton navButton;
+    private RuneLiteApi runeLiteApi;
 
     @Inject
     private Client client;
+
+    @Inject
+    private EventBus eventBus;
 
     @Inject
     private ClientToolbar clientToolbar;
@@ -46,7 +53,8 @@ public class SlayerMasterPlugin extends Plugin
     @Override
     protected void startUp() throws Exception
     {
-        panel = new SlayerMasterPanel(spriteManager);
+        runeLiteApi = new RuneLiteApi(client);
+        panel = new SlayerMasterPanel(spriteManager, eventBus, runeLiteApi);
 
         spriteManager.getSpriteAsync(SpriteID.SKILL_SLAYER, 0, sprite ->
         {
