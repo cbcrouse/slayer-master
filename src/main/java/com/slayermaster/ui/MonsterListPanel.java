@@ -24,6 +24,8 @@ public class MonsterListPanel extends JPanel
     private final MonsterSelectionListener selectionListener;
     private final Map<String, SlayerAssignment> assignmentDetails;
     private int currentSlayerLevel = -1;
+    DefaultListModel<String> monsterListModel;
+
 
     public MonsterListPanel(
             Map<String, SlayerAssignment> assignmentDetails,
@@ -47,7 +49,7 @@ public class MonsterListPanel extends JPanel
     {
         currentSlayerLevel = runeLiteApi.getCurrentSlayerLevel();
 
-        DefaultListModel<String> monsterListModel = new DefaultListModel<>();
+        monsterListModel = new DefaultListModel<>();
         assignmentDetails.keySet().forEach(monsterListModel::addElement);
 
         monsterList = new JList<>(monsterListModel);
@@ -55,7 +57,7 @@ public class MonsterListPanel extends JPanel
         JScrollPane scrollPane = new JScrollPane(monsterList);
         add(scrollPane, BorderLayout.CENTER);
 
-        JTextField searchField = new SearchTextField(20, spriteManager, this::filterMonsters);
+        JTextField searchField = new SearchTextField(20, spriteManager, this::filterMonsters, "Search...");
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
         searchPanel.add(searchField);
@@ -82,11 +84,19 @@ public class MonsterListPanel extends JPanel
     private void filterMonsters(String text)
     {
         DefaultListModel<String> filteredModel = new DefaultListModel<>();
-        assignmentDetails.keySet().stream()
-                .filter(name -> name.toLowerCase().contains(text))
-                .forEach(filteredModel::addElement);
-        monsterList.setModel(filteredModel);
+        if (text == null || text.isEmpty())
+        {
+            // If the text is null or empty, set the monster list model to the original model
+            monsterList.setModel(monsterListModel);
+        } else
+        {
+            assignmentDetails.keySet().stream()
+                    .filter(name -> name.toLowerCase().contains(text.toLowerCase()))
+                    .forEach(filteredModel::addElement);
+            monsterList.setModel(filteredModel);
+        }
     }
+
 
     private void setupMonsterList()
     {

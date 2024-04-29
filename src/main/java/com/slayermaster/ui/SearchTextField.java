@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 
@@ -17,15 +19,18 @@ public class SearchTextField extends JTextField
     private final int iconWidth = 15; // Adjust as needed based on the actual sprite size
     private final Consumer<String> onFilterChange;
     private final SpriteManager spriteManager;
+    private final String placeholderText;
 
-    public SearchTextField(int columns, SpriteManager spriteManager, Consumer<String> onFilterChange)
+    public SearchTextField(int columns, SpriteManager spriteManager, Consumer<String> onFilterChange, String placeholderText)
     {
         super(columns);
         this.spriteManager = spriteManager;
         this.onFilterChange = onFilterChange;
+        this.placeholderText = placeholderText;
         loadIcon();
         setupAppearance();
         setupDocumentListener();
+        setupFocusListener();
         setMargin(new Insets(2, 2, 2, iconWidth + 5)); // Right margin to prevent text overlap
     }
 
@@ -44,7 +49,35 @@ public class SearchTextField extends JTextField
         setFont(new Font("SansSerif", Font.PLAIN, 14)); // Adjust font size as needed
         setBorder(BorderFactory.createCompoundBorder(
                 getBorder(),
-                BorderFactory.createEmptyBorder(0, 20, 0, iconWidth + 5))); // Right margin to prevent text overlap
+                BorderFactory.createEmptyBorder(0, 5, 0, iconWidth + 5))); // Right margin to prevent text overlap
+        setForeground(Color.GRAY); // Set placeholder text color
+        setText(placeholderText); // Set placeholder text
+    }
+
+    private void setupFocusListener()
+    {
+        addFocusListener(new FocusListener()
+        {
+            @Override
+            public void focusGained(FocusEvent e)
+            {
+                if (getText().equals(placeholderText))
+                {
+                    setText("");
+                    setForeground(Color.WHITE); // Set text color to white when typing
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e)
+            {
+                if (getText().isEmpty())
+                {
+                    setText(placeholderText);
+                    setForeground(Color.GRAY); // Set text color to gray for placeholder text
+                }
+            }
+        });
     }
 
     private void setupDocumentListener()
@@ -53,19 +86,34 @@ public class SearchTextField extends JTextField
         {
             public void insertUpdate(DocumentEvent e)
             {
-                if (onFilterChange != null) onFilterChange.accept(getText().trim().toLowerCase());
+                handleFilterChange();
             }
 
             public void removeUpdate(DocumentEvent e)
             {
-                if (onFilterChange != null) onFilterChange.accept(getText().trim().toLowerCase());
+                handleFilterChange();
             }
 
             public void changedUpdate(DocumentEvent e)
             {
-                if (onFilterChange != null) onFilterChange.accept(getText().trim().toLowerCase());
+                handleFilterChange();
             }
         });
+    }
+
+    private void handleFilterChange()
+    {
+        if (onFilterChange != null)
+        {
+            String text = getText().trim();
+            if (text.isEmpty() || text.equals(placeholderText))
+            {
+                onFilterChange.accept(null); // Pass null when the search text is empty or the placeholder text
+            } else
+            {
+                onFilterChange.accept(text.toLowerCase());
+            }
+        }
     }
 
     @Override
