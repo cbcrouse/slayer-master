@@ -11,12 +11,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.Objects;
 
 public class MonsterListPanel extends JPanel
 {
-    private JComboBox<String> filterComboBox;
-    private JComboBox<String> sortComboBox;
     private final SpriteManager spriteManager;
     private final int hoveredIndex = -1;
     private final RuneLiteApi runeLiteApi;
@@ -56,6 +56,25 @@ public class MonsterListPanel extends JPanel
         // Initialize sort combo box
         String[] sortOptions = new String[]{"A-Z", "Z-A", "Slayer Level High->Low", "Slayer Level Low->High"}; // Add your sort options here
         JComboBox<String> sortComboBox = new JComboBox<>(sortOptions);
+        sortComboBox.addActionListener(e ->
+        {
+            String selectedSort = (String) sortComboBox.getSelectedItem();
+            switch (Objects.requireNonNull(selectedSort))
+            {
+                case "A-Z":
+                    sortByNameAscending();
+                    break;
+                case "Z-A":
+                    sortByNameDescending();
+                    break;
+                case "Slayer Level High->Low":
+                    sortBySlayerLevelDescending();
+                    break;
+                case "Slayer Level Low->High":
+                    sortBySlayerLevelAscending();
+                    break;
+            }
+        });
 
         // Initialize level combo box
         Integer[] levelOptions = new Integer[99];
@@ -113,7 +132,6 @@ public class MonsterListPanel extends JPanel
         setupMonsterList();
     }
 
-
     public void updateSlayerLevel()
     {
         this.currentSlayerLevel = runeLiteApi.getCurrentSlayerLevel();  // Fetch the updated level
@@ -144,6 +162,39 @@ public class MonsterListPanel extends JPanel
         }
     }
 
+    private void sortByNameAscending()
+    {
+        monsterListModel.clear();
+        assignmentDetails.keySet().stream()
+                .sorted(String::compareToIgnoreCase)
+                .forEach(monsterListModel::addElement);
+    }
+
+    private void sortByNameDescending()
+    {
+        monsterListModel.clear();
+        assignmentDetails.keySet().stream()
+                .sorted((s1, s2) -> s2.compareToIgnoreCase(s1))
+                .forEach(monsterListModel::addElement);
+    }
+
+    private void sortBySlayerLevelDescending()
+    {
+        monsterListModel.clear();
+        assignmentDetails.values().stream()
+                .sorted((a1, a2) -> Integer.compare(Integer.parseInt(a2.getSlayerLevel()), Integer.parseInt(a1.getSlayerLevel())))
+                .map(SlayerAssignment::getMonsterName)
+                .forEach(monsterListModel::addElement);
+    }
+
+    private void sortBySlayerLevelAscending()
+    {
+        monsterListModel.clear();
+        assignmentDetails.values().stream()
+                .sorted(Comparator.comparingInt(a -> Integer.parseInt(a.getSlayerLevel())))
+                .map(SlayerAssignment::getMonsterName)
+                .forEach(monsterListModel::addElement);
+    }
 
     private void setupMonsterList()
     {
