@@ -11,7 +11,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
 import java.util.Map;
 
 public class MonsterListPanel extends JPanel
@@ -68,8 +67,11 @@ public class MonsterListPanel extends JPanel
 
         // Create labels for combo boxes
         JLabel filterLabel = new JLabel("Filter:");
+        filterLabel.setToolTipText("Filter monsters in the list by criteria (e.g., Attribute).");
         JLabel sortLabel = new JLabel("Sort:");
-        JLabel levelLabel = new JLabel("Level:");
+        sortLabel.setToolTipText("Sort monsters in the list.");
+        JLabel levelLabel = new JLabel("Slayer Level:");
+        levelLabel.setToolTipText("Show monsters in the list at or below the selected slayer level.");
 
         // Create panel for combo boxes
         JPanel comboBoxPanel = new JPanel();
