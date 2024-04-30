@@ -82,23 +82,23 @@ public class MonsterListPanel extends JPanel
         comboBoxPanel.add(levelComboBox);
 
         // Add empty border around combo box panel
-        comboBoxPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // Create spacer between combo box panel and search panel
-        JPanel spacerPanel = new JPanel();
-        spacerPanel.setPreferredSize(new Dimension(10, 10)); // Adjust spacer size as needed
-
-        // Add components to main panel
-        add(comboBoxPanel, BorderLayout.NORTH);
-        add(spacerPanel, BorderLayout.CENTER); // Spacer panel between combobox and search panel
+        comboBoxPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         // Initialize search field and panel
         JTextField searchField = new SearchTextField(20, spriteManager, this::filterMonsters, "Search...");
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
         searchPanel.add(searchField);
-        searchPanel.add(Box.createRigidArea(new Dimension(0, 10))); // spacer
-        add(searchPanel, BorderLayout.CENTER);
+        searchPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Spacer
+
+        // Create a container panel to hold the combo box panel and the search panel
+        JPanel containerPanel = new JPanel();
+        containerPanel.setLayout(new BoxLayout(containerPanel, BoxLayout.Y_AXIS));
+        containerPanel.add(comboBoxPanel);
+        containerPanel.add(searchPanel);
+
+        // Add the container panel to the NORTH position of the main panel
+        add(containerPanel, BorderLayout.NORTH);
 
         // Initialize monster list model and JList
         monsterListModel = new DefaultListModel<>();
@@ -106,10 +106,11 @@ public class MonsterListPanel extends JPanel
         monsterList = new JList<>(monsterListModel);
         monsterList.setCellRenderer(new MonsterListCellRenderer(assignmentDetails, currentSlayerLevel));
         JScrollPane scrollPane = new JScrollPane(monsterList);
-        add(scrollPane, BorderLayout.SOUTH);
+        add(scrollPane, BorderLayout.CENTER);
 
         setupMonsterList();
     }
+
 
     public void updateSlayerLevel()
     {

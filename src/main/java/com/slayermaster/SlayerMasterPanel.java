@@ -49,6 +49,7 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
         cardPanel.add(listPanel, "List");
         cardPanel.add(detailPanel, "Details");
         add(cardPanel, BorderLayout.CENTER); // List and Details are switchable views
+        listPanel.setBackground(Color.pink);
     }
 
     private void initializeMonsterDetails()
@@ -75,6 +76,8 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
     public void showPanel(String panelName)
     {
         cardLayout.show(cardPanel, panelName);
+        cardPanel.revalidate();
+        cardPanel.repaint();
     }
 
     @Override
@@ -82,5 +85,7 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
     {
         detailPanel.setMonsterDetails(slayerAssignment);
         showPanel("Details");
+        detailPanel.revalidate();
+        detailPanel.repaint();
     }
 }

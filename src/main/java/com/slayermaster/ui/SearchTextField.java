@@ -31,7 +31,6 @@ public class SearchTextField extends JTextField
         setupAppearance();
         setupDocumentListener();
         setupFocusListener();
-        setMargin(new Insets(2, 2, 2, iconWidth + 5)); // Right margin to prevent text overlap
     }
 
     private void loadIcon()
@@ -47,6 +46,7 @@ public class SearchTextField extends JTextField
     {
         setPreferredSize(new Dimension(200, 30)); // Set preferred height to 30
         setFont(new Font("SansSerif", Font.PLAIN, 14)); // Adjust font size as needed
+        setMargin(new Insets(2, 2, 2, iconWidth + 5)); // Right margin to prevent text overlap
         setBorder(BorderFactory.createCompoundBorder(
                 getBorder(),
                 BorderFactory.createEmptyBorder(0, 5, 0, iconWidth + 5))); // Right margin to prevent text overlap
@@ -71,10 +71,13 @@ public class SearchTextField extends JTextField
             @Override
             public void focusLost(FocusEvent e)
             {
-                if (getText().isEmpty())
+                if (getText().isEmpty() || getText().equals(placeholderText))
                 {
                     setText(placeholderText);
                     setForeground(Color.GRAY); // Set text color to gray for placeholder text
+                } else
+                {
+                    setForeground(Color.WHITE); // Set text color to white when typing
                 }
             }
         });
