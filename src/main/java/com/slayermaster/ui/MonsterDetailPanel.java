@@ -5,6 +5,7 @@ import java.awt.*;
 import java.util.Arrays;
 
 import com.slayermaster.api.SlayerAssignment;
+import com.slayermaster.api.SlayerLocation;
 import com.slayermaster.data.ImageCacheManager;
 import com.slayermaster.data.ImageManager;
 
@@ -82,11 +83,29 @@ public class MonsterDetailPanel extends JPanel
         details.append("<h2>Slayer level:</h2>");
         details.append("- ").append(slayerAssignment.getSlayerLevel()).append("<br>");
 
-        // Append locations
-        details.append("<h2>Locations:</h2>");
-        for (String location : slayerAssignment.getLocations())
+        // Append locations or slayer locations if available
+        if (slayerAssignment.getSlayerLocations() != null && !slayerAssignment.getSlayerLocations().isEmpty())
         {
-            details.append("- ").append(location).append("<br>");
+            details.append("<h2>Slayer Locations:</h2>");
+            for (SlayerLocation slayerLocation : slayerAssignment.getSlayerLocations())
+            {
+                details.append("<h3>").append(slayerLocation.getLocationName()).append("</h3>");
+                details.append("<ul>");
+                details.append("<li><a href='").append(slayerLocation.getMapLink()).append("'>Map Link</a>").append("</li>");
+                details.append("<li><b>Amount:</b> ").append(slayerLocation.getAmount()).append("</li>");
+                details.append("<li><b>Multicombat:</b> ").append(slayerLocation.isMulticombat() ? "Yes" : "No").append("</li>");
+                details.append("<li><b>Cannonable:</b> ").append(slayerLocation.isCannonable() ? "Yes" : "No").append("</li>");
+                details.append("<li><b>Safespottable:</b> ").append(slayerLocation.isSafespottable() ? "Yes" : "No").append("</li>");
+                details.append("<li><b>Notes:</b> ").append(slayerLocation.getNotes()).append("</li>");
+                details.append("</ul>");
+            }
+        } else
+        {
+            details.append("<h2>Locations:</h2>");
+            for (String location : slayerAssignment.getLocations())
+            {
+                details.append("- ").append(location).append("<br>");
+            }
         }
 
         // Append alternatives if available
@@ -123,4 +142,5 @@ public class MonsterDetailPanel extends JPanel
 
         return details.toString();
     }
+
 }

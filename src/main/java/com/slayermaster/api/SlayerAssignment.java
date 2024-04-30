@@ -1,5 +1,6 @@
 package com.slayermaster.api;
 
+import java.util.List;
 import java.util.Optional;
 
 public class SlayerAssignment
@@ -7,6 +8,7 @@ public class SlayerAssignment
     private String slayerLevel;
     private String taskName;
     private String monsterName;
+    private List<SlayerLocation> slayerLocations;
     private String[] locations;
     private String[] requiredItems;
     private String attribute;
@@ -47,6 +49,8 @@ public class SlayerAssignment
         return monsterName;
     }
 
+    public List<SlayerLocation> getSlayerLocations() { return slayerLocations; }
+
     public String[] getLocations()
     {
         return locations;
@@ -72,6 +76,12 @@ public class SlayerAssignment
     public String[] getSlayerMasters()
     {
         return slayerMasters;
+    }
+
+    // Setters
+    public void setSlayerLocation(List<SlayerLocation> slayerLocations)
+    {
+        this.slayerLocations = slayerLocations;
     }
 }
 

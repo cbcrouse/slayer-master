@@ -127,41 +127,145 @@ public class OSRSWikiScraper
         future.thenAccept(html ->
         {
             Document doc = Jsoup.parse(html);
-            Element comparisonHeader = doc.selectFirst("h2:contains(Location Comparison)");
+            Elements comparisonHeaders = doc.select("h2");
+            Element comparisonHeader = null;
+
+            // Loop through all found headers and pick the first one containing both "Location" and "Comparison"
+            for (Element header : comparisonHeaders)
+            {
+                String headerText = header.text().toLowerCase();
+                if ((headerText.contains("location") && headerText.contains("comparison")) ||
+                        (headerText.contains("location") && headerText.contains("variants")) ||
+                        headerText.contains("locations"))
+                {
+                    comparisonHeader = header;
+                    break; // Stop searching once a suitable header is found
+                }
+            }
+
             if (comparisonHeader != null)
             {
-                Element comparisonTable = comparisonHeader.nextElementSibling();
-                if (comparisonTable != null && comparisonTable.tagName().equalsIgnoreCase("table"))
-                {
-                    Elements rows = comparisonTable.select("tbody tr");
-                    for (Element row : rows)
-                    {
-                        Elements cells = row.select("td");
-                        if (cells.size() >= 7)
-                        {
-                            String location = cells.get(0).text();
-                            String mapLink = ""; // Initialize mapLink to empty string
-                            Element mapLinkElement = cells.get(1).select("a").first(); // Select the first <a> element
-                            if (mapLinkElement != null)
-                            {
-                                String zoom = mapLinkElement.attr("data-zoom"); // Get latitude
-                                String lat = mapLinkElement.attr("data-lat"); // Get latitude
-                                String lon = mapLinkElement.attr("data-lon"); // Get longitude
-                                String mapId = mapLinkElement.attr("data-mapid"); // Get map ID
-                                String plane = mapLinkElement.attr("data-plane"); // Get plane
-                                // Example : <td><a class="mw-kartographer-maplink mw-kartographer-link" data-mw="interface" data-zoom="2" data-lat="10074" data-lon="1631" data-mapid="32" data-plane="0" data-overlays="[&quot;pins&quot;]" href="#mapFullscreen">Maplink</a></td>
-                                // https://maps.runescape.wiki/osrs/#3/32/0/1631/10074
-                                mapLink = "https://maps.runescape.wiki/osrs/#" + zoom + "/" + mapId + "/" + plane + "/" + lon + "/" + lat;
-                            }
-                            String amount = cells.get(2).text();
-                            boolean multicombat = parseBoolean(cells.get(3).text());
-                            boolean cannonable = parseBoolean(cells.get(4).text());
-                            boolean safespottable = parseBoolean(cells.get(5).text());
-                            String notes = cells.get(6).text();
+                Element comparisonTable = null;
+                Element nextElement = comparisonHeader.nextElementSibling();
 
-                            SlayerLocation slayerLocation = new SlayerLocation(location, mapLink, amount, multicombat, cannonable, safespottable, notes);
-                            locations.add(slayerLocation);
+                // Loop through the siblings of the header until a table tag is found
+                while (nextElement != null)
+                {
+                    if (nextElement.tagName().equalsIgnoreCase("table"))
+                    {
+                        // Check if the first column of the header row contains "Location"
+                        Element headerRow = nextElement.selectFirst("tr");
+                        if (headerRow != null)
+                        {
+                            Element firstColumnHeader = headerRow.selectFirst("th");
+                            if (firstColumnHeader != null && firstColumnHeader.text().equalsIgnoreCase("Location"))
+                            {
+                                comparisonTable = nextElement;
+                                break; // Stop searching once the table with the correct header is found
+                            }
                         }
+                    }
+                    nextElement = nextElement.nextElementSibling();
+                }
+
+                if (comparisonTable != null)
+                {
+                    // Find the table header row
+                    Element headerRow = comparisonTable.selectFirst("tr");
+                    if (headerRow != null)
+                    {
+                        // Get the column indices based on the header names
+                        int locationIndex = -1;
+                        int mapIndex = -1;
+                        int amountIndex = -1;
+                        int multicombatIndex = -1;
+                        int cannonableIndex = -1;
+                        int safespottableIndex = -1;
+                        int notesIndex = -1;
+
+                        Elements headers = headerRow.select("th");
+                        for (int i = 0; i < headers.size(); i++)
+                        {
+                            Element header = headers.get(i);
+                            String headerText = header.text().trim();
+                            switch (headerText)
+                            {
+                                case "Location":
+                                    locationIndex = i;
+                                    break;
+                                case "Map":
+                                case "Maplink":
+                                    mapIndex = i;
+                                    break;
+                                case "Amount":
+                                case "Spawns":
+                                    amountIndex = i;
+                                    break;
+                                case "Multicombat":
+                                    multicombatIndex = i;
+                                    break;
+                                case "Cannonable":
+                                    cannonableIndex = i;
+                                    break;
+                                case "Safespottable":
+                                    safespottableIndex = i;
+                                    break;
+                                case "Notes":
+                                    notesIndex = i;
+                                    break;
+                                default:
+                                    // Handle unknown column headers if necessary
+                            }
+                        }
+
+                        // Iterate over table rows and extract data
+                        Elements rows = comparisonTable.select("tbody tr");
+                        for (int i = 1; i < rows.size(); i++) // Start from index 1 to skip the header row
+                        {
+                            Element row = rows.get(i);
+                            Elements cells = row.select("td");
+                            if (cells.size() >= Math.max(Math.max(locationIndex, mapIndex), Math.max(amountIndex, Math.max(multicombatIndex, Math.max(cannonableIndex, safespottableIndex)))))
+                            {
+                                // Extract data using the determined column indices
+                                String location = locationIndex != -1 ? cells.get(locationIndex).text() : "";
+                                String mapLink = ""; // Initialize mapLink to empty string
+                                // Use column index to retrieve data
+                                if (mapIndex != -1)
+                                {
+                                    Element mapLinkElement = cells.get(mapIndex).select("a").first(); // Select the first <a> element
+                                    if (mapLinkElement != null)
+                                    {
+                                        String zoom = mapLinkElement.attr("data-zoom"); // Get latitude
+                                        String lat = mapLinkElement.attr("data-lat"); // Get latitude
+                                        String lon = mapLinkElement.attr("data-lon"); // Get longitude
+                                        String mapId = mapLinkElement.attr("data-mapid"); // Get map ID
+                                        String plane = mapLinkElement.attr("data-plane"); // Get plane
+                                        // Example : <td><a class="mw-kartographer-maplink mw-kartographer-link" data-mw="interface" data-zoom="2" data-lat="10074" data-lon="1631" data-mapid="32" data-plane="0" data-overlays="[&quot;pins&quot;]" href="#mapFullscreen">Maplink</a></td>
+                                        // https://maps.runescape.wiki/osrs/#3/32/0/1631/10074
+                                        mapLink = "https://maps.runescape.wiki/osrs/#" + zoom + "/" + mapId + "/" + plane + "/" + lon + "/" + lat;
+                                    }
+                                }
+                                String amount = amountIndex != -1 ? cells.get(amountIndex).text() : "";
+                                boolean multicombat = multicombatIndex != -1 && parseBoolean(cells.get(multicombatIndex).text());
+                                boolean cannonable = cannonableIndex != -1 && parseBoolean(cells.get(cannonableIndex).text());
+                                boolean safespottable = safespottableIndex != -1 && parseBoolean(cells.get(safespottableIndex).text());
+
+                                // There's an odd scenario where the <td> is missing for Notes in the table causing a misalignment with the number of columns versus number of cells in the row.
+                                // So far, this is only an issue with the Notes column at the end of the table, so this line ensures we do not get an index out of bounds.
+                                String notes = notesIndex != -1 && notesIndex < cells.size() ? cells.get(notesIndex).text() : "Notes not available";
+
+                                SlayerLocation slayerLocation = new SlayerLocation(location, mapLink, amount, multicombat, cannonable, safespottable, notes);
+                                locations.add(slayerLocation);
+                            } else
+                            {
+                                // Log an error message if the row doesn't have enough columns
+                                System.out.println("Incomplete row in Location Comparison table for task: " + taskName);
+                            }
+                        }
+                    } else
+                    {
+                        // Log an error message if no header row is found
+                        System.out.println("No header row found in Location Comparison table for task: " + taskName);
                     }
                 } else
                 {
@@ -179,6 +283,7 @@ public class OSRSWikiScraper
         }).join(); // Wait for the future to complete before returning the list
         return locations;
     }
+
 
     private boolean parseBoolean(String value)
     {
