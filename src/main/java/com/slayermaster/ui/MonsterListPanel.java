@@ -53,29 +53,6 @@ public class MonsterListPanel extends JPanel
         String[] filterOptions = new String[]{"Filter 1", "Filter 2", "Filter 3"}; // Add your filter options here
         JComboBox<String> filterComboBox = new JComboBox<>(filterOptions);
 
-        // Initialize sort combo box
-        String[] sortOptions = new String[]{"A-Z", "Z-A", "Slayer Level High->Low", "Slayer Level Low->High"}; // Add your sort options here
-        JComboBox<String> sortComboBox = new JComboBox<>(sortOptions);
-        sortComboBox.addActionListener(e ->
-        {
-            String selectedSort = (String) sortComboBox.getSelectedItem();
-            switch (Objects.requireNonNull(selectedSort))
-            {
-                case "A-Z":
-                    sortByNameAscending();
-                    break;
-                case "Z-A":
-                    sortByNameDescending();
-                    break;
-                case "Slayer Level High->Low":
-                    sortBySlayerLevelDescending();
-                    break;
-                case "Slayer Level Low->High":
-                    sortBySlayerLevelAscending();
-                    break;
-            }
-        });
-
         // Initialize level combo box
         Integer[] levelOptions = new Integer[99];
         for (int i = 0; i < 99; i++)
@@ -83,6 +60,35 @@ public class MonsterListPanel extends JPanel
             levelOptions[i] = i + 1;
         }
         JComboBox<Integer> levelComboBox = new JComboBox<>(levelOptions);
+        levelComboBox.addActionListener(e ->
+        {
+            int selectedLevel = (Integer) levelComboBox.getSelectedItem();
+            filterBySlayerLevel(selectedLevel);
+        });
+
+        // Initialize sort combo box
+        String[] sortOptions = new String[]{"A-Z", "Z-A", "Slayer Level High->Low", "Slayer Level Low->High"}; // Add your sort options here
+        JComboBox<String> sortComboBox = new JComboBox<>(sortOptions);
+        sortComboBox.addActionListener(e ->
+        {
+            String selectedSort = (String) sortComboBox.getSelectedItem();
+            int maxLevel = (Integer) levelComboBox.getSelectedItem(); // Get the maximum Slayer Level selected
+            switch (Objects.requireNonNull(selectedSort))
+            {
+                case "A-Z":
+                    sortByNameAscending(maxLevel); // Pass maxLevel to sorting methods
+                    break;
+                case "Z-A":
+                    sortByNameDescending(maxLevel);
+                    break;
+                case "Slayer Level High->Low":
+                    sortBySlayerLevelDescending(maxLevel);
+                    break;
+                case "Slayer Level Low->High":
+                    sortBySlayerLevelAscending(maxLevel);
+                    break;
+            }
+        });
 
         // Create labels for combo boxes
         JLabel filterLabel = new JLabel("Filter:");
@@ -139,12 +145,21 @@ public class MonsterListPanel extends JPanel
         monsterList.repaint();  // Refresh the list to reflect changes
     }
 
-
     @Subscribe
     public void onSlayerTaskUpdatedEvent(SlayerTaskUpdatedEvent event)
     {
         updateSlayerLevel();
     }
+
+    private void filterBySlayerLevel(int level)
+    {
+        monsterListModel.clear();
+        assignmentDetails.values().stream()
+                .filter(assignment -> Integer.parseInt(assignment.getSlayerLevel()) <= level)
+                .map(SlayerAssignment::getMonsterName)
+                .forEach(monsterListModel::addElement);
+    }
+
 
     private void filterMonsters(String text)
     {
@@ -162,39 +177,46 @@ public class MonsterListPanel extends JPanel
         }
     }
 
-    private void sortByNameAscending()
-    {
-        monsterListModel.clear();
-        assignmentDetails.keySet().stream()
-                .sorted(String::compareToIgnoreCase)
-                .forEach(monsterListModel::addElement);
-    }
-
-    private void sortByNameDescending()
-    {
-        monsterListModel.clear();
-        assignmentDetails.keySet().stream()
-                .sorted((s1, s2) -> s2.compareToIgnoreCase(s1))
-                .forEach(monsterListModel::addElement);
-    }
-
-    private void sortBySlayerLevelDescending()
+    private void sortByNameDescending(int maxLevel)
     {
         monsterListModel.clear();
         assignmentDetails.values().stream()
+                .filter(assignment -> Integer.parseInt(assignment.getSlayerLevel()) <= maxLevel) // Filter by Slayer Level
+                .sorted(Comparator.comparing(SlayerAssignment::getMonsterName).reversed()) // Sort by name descending
+                .map(SlayerAssignment::getMonsterName)
+                .forEach(monsterListModel::addElement);
+    }
+
+    private void sortByNameAscending(int maxLevel)
+    {
+        monsterListModel.clear();
+        assignmentDetails.values().stream()
+                .filter(assignment -> Integer.parseInt(assignment.getSlayerLevel()) <= maxLevel) // Filter by Slayer Level
+                .sorted(Comparator.comparing(SlayerAssignment::getMonsterName)) // Sort by name ascending
+                .map(SlayerAssignment::getMonsterName)
+                .forEach(monsterListModel::addElement);
+    }
+
+    private void sortBySlayerLevelDescending(int maxLevel)
+    {
+        monsterListModel.clear();
+        assignmentDetails.values().stream()
+                .filter(assignment -> Integer.parseInt(assignment.getSlayerLevel()) <= maxLevel) // Filter by Slayer Level
                 .sorted((a1, a2) -> Integer.compare(Integer.parseInt(a2.getSlayerLevel()), Integer.parseInt(a1.getSlayerLevel())))
                 .map(SlayerAssignment::getMonsterName)
                 .forEach(monsterListModel::addElement);
     }
 
-    private void sortBySlayerLevelAscending()
+    private void sortBySlayerLevelAscending(int maxLevel)
     {
         monsterListModel.clear();
         assignmentDetails.values().stream()
-                .sorted(Comparator.comparingInt(a -> Integer.parseInt(a.getSlayerLevel())))
+                .filter(assignment -> Integer.parseInt(assignment.getSlayerLevel()) <= maxLevel) // Filter by Slayer Level
+                .sorted(Comparator.comparingInt(assignment -> Integer.parseInt(assignment.getSlayerLevel())))
                 .map(SlayerAssignment::getMonsterName)
                 .forEach(monsterListModel::addElement);
     }
+
 
     private void setupMonsterList()
     {
