@@ -5,6 +5,7 @@ import java.util.Optional;
 public class SlayerAssignment
 {
     private String slayerLevel;
+    private String taskName;
     private String monsterName;
     private String[] locations;
     private String[] requiredItems;
@@ -15,6 +16,7 @@ public class SlayerAssignment
 
     // Constructor
     public SlayerAssignment(String slayerLevel,
+                            String taskName,
                             String monsterName,
                             String[] locations,
                             String[] requiredItems,
@@ -25,6 +27,7 @@ public class SlayerAssignment
     {
         // Use Optional.ofNullable to handle potential null values
         this.slayerLevel = Optional.ofNullable(slayerLevel).orElse("1");
+        this.taskName = Optional.ofNullable(taskName).orElse("Unknown");
         this.monsterName = Optional.ofNullable(monsterName).orElse("Unknown");
         this.locations = Optional.ofNullable(locations).orElse(new String[]{"Unknown"});
         this.requiredItems = Optional.ofNullable(requiredItems).orElse(new String[]{});
@@ -35,10 +38,9 @@ public class SlayerAssignment
     }
 
     // Getters
-    public String getSlayerLevel()
-    {
-        return slayerLevel;
-    }
+    public String getSlayerLevel() { return slayerLevel; }
+
+    public String getTaskName() { return taskName; }
 
     public String getMonsterName()
     {

@@ -1,7 +1,9 @@
 package com.slayermaster.ui;
 
+import com.slayermaster.api.OSRSWikiScraper;
 import com.slayermaster.api.RuneLiteApi;
 import com.slayermaster.api.SlayerAssignment;
+import com.slayermaster.api.SlayerLocation;
 import com.slayermaster.events.SlayerTaskUpdatedEvent;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -12,6 +14,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 

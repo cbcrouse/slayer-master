@@ -76,6 +76,12 @@ public class OSRSWikiScraper
                 Elements tds = row.select("td");
                 String slayerLevel = !tds.isEmpty() ? tds.get(0).text() : "0";
                 String monsterHref = tds.size() > 1 && tds.get(1).select("a").first() != null ? tds.get(1).select("a").first().attr("href") : "";
+                String taskName = ""; // Initialize taskName variable
+                Element taskNameElement = tds.size() > 1 ? tds.get(1).select("a").first() : null; // Select the first <a> element
+                if (taskNameElement != null)
+                {
+                    taskName = taskNameElement.text(); // Get the text of the <a> element
+                }
                 String monsterName = monsterHref.isEmpty() ? "Unknown" : monsterHref.substring(monsterHref.lastIndexOf('/') + 1).replace("_", " ");
                 String location = tds.size() > 2 ? tds.get(2).text() : "Unknown";
 
@@ -97,6 +103,7 @@ public class OSRSWikiScraper
 
                 SlayerAssignment assignment = new SlayerAssignment(
                         slayerLevel,
+                        taskName,
                         monsterName,
                         new String[]{location}, // Handle multiple locations if necessary
                         requiredItems,
@@ -110,6 +117,72 @@ public class OSRSWikiScraper
             }
         }).join(); // Wait for the future to complete before returning the list
         return assignments;
+    }
+
+    public List<SlayerLocation> parseLocationComparisonTable(String taskName)
+    {
+        List<SlayerLocation> locations = new ArrayList<>();
+        String url = baseWikiUrl + "Slayer_task%2F" + taskName;
+        CompletableFuture<String> future = requestAsync(HttpClientSingleton.getInstance(), url);
+        future.thenAccept(html ->
+        {
+            Document doc = Jsoup.parse(html);
+            Element comparisonHeader = doc.selectFirst("h2:contains(Location Comparison)");
+            if (comparisonHeader != null)
+            {
+                Element comparisonTable = comparisonHeader.nextElementSibling();
+                if (comparisonTable != null && comparisonTable.tagName().equalsIgnoreCase("table"))
+                {
+                    Elements rows = comparisonTable.select("tbody tr");
+                    for (Element row : rows)
+                    {
+                        Elements cells = row.select("td");
+                        if (cells.size() >= 7)
+                        {
+                            String location = cells.get(0).text();
+                            String mapLink = ""; // Initialize mapLink to empty string
+                            Element mapLinkElement = cells.get(1).select("a").first(); // Select the first <a> element
+                            if (mapLinkElement != null)
+                            {
+                                String zoom = mapLinkElement.attr("data-zoom"); // Get latitude
+                                String lat = mapLinkElement.attr("data-lat"); // Get latitude
+                                String lon = mapLinkElement.attr("data-lon"); // Get longitude
+                                String mapId = mapLinkElement.attr("data-mapid"); // Get map ID
+                                String plane = mapLinkElement.attr("data-plane"); // Get plane
+                                // Example : <td><a class="mw-kartographer-maplink mw-kartographer-link" data-mw="interface" data-zoom="2" data-lat="10074" data-lon="1631" data-mapid="32" data-plane="0" data-overlays="[&quot;pins&quot;]" href="#mapFullscreen">Maplink</a></td>
+                                // https://maps.runescape.wiki/osrs/#3/32/0/1631/10074
+                                mapLink = "https://maps.runescape.wiki/osrs/#" + zoom + "/" + mapId + "/" + plane + "/" + lon + "/" + lat;
+                            }
+                            String amount = cells.get(2).text();
+                            boolean multicombat = parseBoolean(cells.get(3).text());
+                            boolean cannonable = parseBoolean(cells.get(4).text());
+                            boolean safespottable = parseBoolean(cells.get(5).text());
+                            String notes = cells.get(6).text();
+
+                            SlayerLocation slayerLocation = new SlayerLocation(location, mapLink, amount, multicombat, cannonable, safespottable, notes);
+                            locations.add(slayerLocation);
+                        }
+                    }
+                } else
+                {
+                    System.out.println("Location Comparison table not found for task: " + taskName);
+                }
+            } else
+            {
+                System.out.println("Location Comparison header not found for task: " + taskName);
+            }
+        }).exceptionally(ex ->
+        {
+            // Handle exceptions here
+            System.out.println("Failed to parse Location Comparison table for task: " + taskName + " - " + ex.getMessage());
+            return null;
+        }).join(); // Wait for the future to complete before returning the list
+        return locations;
+    }
+
+    private boolean parseBoolean(String value)
+    {
+        return value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true");
     }
 
     public static String getWikiUrl(String itemOrMonsterName)

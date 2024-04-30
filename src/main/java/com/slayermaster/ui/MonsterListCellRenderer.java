@@ -40,7 +40,8 @@ public class MonsterListCellRenderer extends DefaultListCellRenderer
         JPanel panel = new JPanel(new BorderLayout());
 
         // Get the slayer level and pad it with spaces
-        SlayerAssignment assignment = assignmentDetails.get(value.toString());
+        String monsterName = value.toString();
+        SlayerAssignment assignment = assignmentDetails.get(monsterName);
         String slayerLevelString = assignment != null ? assignment.getSlayerLevel() : "0";
         JLabel slayerLevelLabel = new JLabel(slayerLevelString);
         slayerLevelLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Adjust padding as needed
@@ -68,13 +69,14 @@ public class MonsterListCellRenderer extends DefaultListCellRenderer
 
         panel.add(slayerLevelLabel, BorderLayout.WEST);
 
-        JLabel nameLabel = new JLabel(value.toString());
-        nameLabel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10)); // Adjust padding as needed
-
-        panel.add(nameLabel, BorderLayout.CENTER);
-        panel.setToolTipText(value.toString());
-
-        setupIcon(value.toString(), panel);
+        if (assignment != null)
+        {
+            JLabel nameLabel = new JLabel(assignment.getTaskName());
+            nameLabel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10)); // Adjust padding as needed
+            panel.add(nameLabel, BorderLayout.CENTER);
+            panel.setToolTipText(monsterName);
+            setupIcon(monsterName, panel);
+        }
 
         if (isSelected)
         {
@@ -90,14 +92,10 @@ public class MonsterListCellRenderer extends DefaultListCellRenderer
 
     private void setupIcon(String monsterName, JPanel panel)
     {
-        SlayerAssignment slayerAssignment = assignmentDetails.get(monsterName);
-        if (slayerAssignment != null)
-        {
-            ImageIcon icon = imageCacheManager.getCachedMonsterImage(monsterName);
-            ImageIcon resizedIcon = imageManager.resizeIcon(icon, 25);
-            JLabel iconLabel = new JLabel(resizedIcon);
-            iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-            panel.add(iconLabel, BorderLayout.EAST);
-        }
+        ImageIcon icon = imageCacheManager.getCachedMonsterImage(monsterName);
+        ImageIcon resizedIcon = imageManager.resizeIcon(icon, 25);
+        JLabel iconLabel = new JLabel(resizedIcon);
+        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        panel.add(iconLabel, BorderLayout.EAST);
     }
 }

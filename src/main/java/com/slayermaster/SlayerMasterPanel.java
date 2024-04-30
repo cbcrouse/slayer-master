@@ -3,6 +3,7 @@ package com.slayermaster;
 import com.slayermaster.api.OSRSWikiScraper;
 import com.slayermaster.api.RuneLiteApi;
 import com.slayermaster.api.SlayerAssignment;
+import com.slayermaster.api.SlayerLocation;
 import com.slayermaster.data.ImageManager;
 import com.slayermaster.data.WikiDataLoader;
 import com.slayermaster.ui.*;
@@ -49,7 +50,6 @@ public class SlayerMasterPanel extends PluginPanel implements NavigationControll
         cardPanel.add(listPanel, "List");
         cardPanel.add(detailPanel, "Details");
         add(cardPanel, BorderLayout.CENTER); // List and Details are switchable views
-        listPanel.setBackground(Color.pink);
     }
 
     private void initializeMonsterDetails()
