@@ -16,10 +16,10 @@ import net.runelite.api.GameState;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.chat.ChatCommandManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.NPCManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
@@ -45,6 +45,9 @@ public class SlayerMasterPlugin extends Plugin
     private Client client;
 
     @Inject
+    private ClientThread clientThread;
+
+    @Inject
     private EventBus eventBus;
 
     @Inject
@@ -59,7 +62,7 @@ public class SlayerMasterPlugin extends Plugin
     @Override
     protected void startUp() throws Exception
     {
-        runeLiteApi = new RuneLiteApi(client);
+        runeLiteApi = new RuneLiteApi(client, clientThread, eventBus);
         panel = new SlayerMasterPanel(spriteManager, eventBus, runeLiteApi, imageManager);
 
         spriteManager.getSpriteAsync(SpriteID.SKILL_SLAYER, 0, sprite ->
@@ -103,22 +106,8 @@ public class SlayerMasterPlugin extends Plugin
             String message = event.getMessage();
             if (message.contains("You're assigned to kill"))
             {
-                updateSlayerTask();
+                runeLiteApi.updateCurrentSlayerTask();
             }
-        }
-    }
-
-    private void updateSlayerTask()
-    {
-        CurrentSlayerTask task = runeLiteApi.getCurrentSlayerTask();
-        if (task != null)
-        {
-            // Publishing the event when the slayer task is updated
-            eventBus.post(new SlayerTaskUpdatedEvent(task));
-            System.out.println("Current Slayer Task: " + task.getCreatureName() + " - " + task.getTaskSize());
-        } else
-        {
-            System.out.println("No current slayer task.");
         }
     }
 

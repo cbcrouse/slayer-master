@@ -38,13 +38,13 @@ public class CurrentTaskPanel extends JPanel
         add(collapsiblePanel);
 
         eventBus.register(this);
-        updateCurrentSlayerTask();
+        updateCurrentSlayerTask(null);
     }
 
     @Subscribe
     public void onSlayerTaskUpdatedEvent(SlayerTaskUpdatedEvent event)
     {
-        updateCurrentSlayerTask();
+        updateCurrentSlayerTask(event.getSlayerTask());
     }
 
     private JPanel createDetailsPanel(CurrentSlayerTask currentTask)
@@ -58,14 +58,17 @@ public class CurrentTaskPanel extends JPanel
             JLabel taskCreature = new JLabel(formatTaskHtml("Creature", currentTask.getCreatureName()), SwingConstants.CENTER);
             JLabel taskCount = new JLabel(formatTaskHtml("Count", String.valueOf(currentTask.getTaskSize())), SwingConstants.CENTER);
             JLabel taskLocation = new JLabel(formatTaskHtml("Location", currentTask.getLocation()), SwingConstants.CENTER);
+            JLabel taskMaster = new JLabel(formatTaskHtml("Slayer Master", currentTask.getSlayerMasterName()), SwingConstants.CENTER);
 
             styleLabel(taskCreature);
             styleLabel(taskCount);
             styleLabel(taskLocation);
+            styleLabel(taskMaster);
 
             detailsPanel.add(taskCreature);
             detailsPanel.add(taskCount);
             detailsPanel.add(taskLocation);
+            detailsPanel.add(taskMaster);
         }
 
         return detailsPanel;
@@ -79,13 +82,12 @@ public class CurrentTaskPanel extends JPanel
         label.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
     }
 
-    public void updateCurrentSlayerTask()
+    public void updateCurrentSlayerTask(CurrentSlayerTask currentSlayerTask)
     {
-        CurrentSlayerTask currentTask = runeLiteApi.getCurrentSlayerTask();
-        if (currentTask != null)
+        if (currentSlayerTask != null)
         {
             collapsiblePanel.setTitle("Current Slayer Task");
-            JPanel detailsPanel = createDetailsPanel(currentTask);
+            JPanel detailsPanel = createDetailsPanel(currentSlayerTask);
             collapsiblePanel.setContent(detailsPanel);
         } else
         {

@@ -54,45 +54,9 @@ public class MonsterListPanel extends JPanel
     {
         currentSlayerLevel = runeLiteApi.getCurrentSlayerLevel();
 
-        // Initialize attribute filter combo box
-        String[] attributeFilterOptions = new String[]{"All", "Draconic", "Fiery", "Undead", "Spooky", "Frosty", "Aquatic", "Reptilian", "Insectoid"}; // Add your attribute filter options here
-        JComboBox<String> attributeFilterComboBox = new JComboBox<>(attributeFilterOptions);
-        attributeFilterComboBox.addActionListener(e ->
-        {
-            String selectedAttribute = (String) attributeFilterComboBox.getSelectedItem();
-            if (!selectedAttribute.equals("All"))
-            {
-                filterByAttribute(selectedAttribute);
-            } else
-            {
-                resetMonsterList();
-            }
-        });
-
-        // Initialize level combo box
-        Integer[] levelOptions = new Integer[100];
-        levelOptions[0] = null; // Set the first option to null
-        for (int i = 1; i < 100; i++)
-        {
-            levelOptions[i] = i;
-        }
-        JComboBox<Integer> levelComboBox = new JComboBox<>(levelOptions);
-        levelComboBox.addActionListener(e ->
-        {
-            selectedSlayerLevel = (Integer) levelComboBox.getSelectedItem();
-            filterBySlayerLevel(selectedSlayerLevel);
-            applySorting();
-        });
-
-        // Initialize sort combo box
-        String[] sortOptions = new String[]{"A-Z", "Z-A", "Slayer Level High->Low", "Slayer Level Low->High"}; // Add your sort options here
-        JComboBox<String> sortComboBox = new JComboBox<>(sortOptions);
-        sortComboBox.setSelectedIndex(0); // Set default selection to "A-Z"
-        sortComboBox.addActionListener(e ->
-        {
-            currentSortMethod = (String) sortComboBox.getSelectedItem();
-            applySorting();
-        });
+        JComboBox<String> attributeFilterComboBox = getAttributeFilterComboBox();
+        JComboBox<Integer> slayerLevelComboBox = getSlayerLevelComboBox();
+        JComboBox<String> sortComboBox = getSortComboBox();
 
         // Create labels for combo boxes
         JLabel attributeFilterLabel = new JLabel("Attribute Filter:");
@@ -106,7 +70,7 @@ public class MonsterListPanel extends JPanel
         JButton clearFiltersButton = new JButton("Clear Filters");
         clearFiltersButton.addActionListener(e ->
         {
-            clearFilters(attributeFilterComboBox, sortComboBox, levelComboBox);
+            clearFilters(attributeFilterComboBox, sortComboBox, slayerLevelComboBox);
         });
 
         // Create panel for combo boxes
@@ -117,7 +81,7 @@ public class MonsterListPanel extends JPanel
         comboBoxPanel.add(sortLabel);
         comboBoxPanel.add(sortComboBox);
         comboBoxPanel.add(levelLabel);
-        comboBoxPanel.add(levelComboBox);
+        comboBoxPanel.add(slayerLevelComboBox);
         comboBoxPanel.add(clearFiltersButton);
 
         // Add empty border around combo box panel
@@ -148,6 +112,55 @@ public class MonsterListPanel extends JPanel
         add(scrollPane, BorderLayout.CENTER);
 
         setupMonsterList();
+    }
+
+    private JComboBox<String> getSortComboBox()
+    {
+        String[] sortOptions = new String[]{"A-Z", "Z-A", "Slayer Level High->Low", "Slayer Level Low->High"}; // Add your sort options here
+        JComboBox<String> sortComboBox = new JComboBox<>(sortOptions);
+        sortComboBox.setSelectedIndex(0); // Set default selection to "A-Z"
+        sortComboBox.addActionListener(e ->
+        {
+            currentSortMethod = (String) sortComboBox.getSelectedItem();
+            applySorting();
+        });
+        return sortComboBox;
+    }
+
+    private JComboBox<Integer> getSlayerLevelComboBox()
+    {
+        Integer[] levelOptions = new Integer[100];
+        levelOptions[0] = null; // Set the first option to null
+        for (int i = 1; i < 100; i++)
+        {
+            levelOptions[i] = i;
+        }
+        JComboBox<Integer> levelComboBox = new JComboBox<>(levelOptions);
+        levelComboBox.addActionListener(e ->
+        {
+            selectedSlayerLevel = (Integer) levelComboBox.getSelectedItem();
+            filterBySlayerLevel(selectedSlayerLevel);
+            applySorting();
+        });
+        return levelComboBox;
+    }
+
+    private JComboBox<String> getAttributeFilterComboBox()
+    {
+        String[] attributeFilterOptions = new String[]{"All", "Draconic", "Fiery", "Undead", "Spooky", "Frosty", "Aquatic", "Reptilian", "Insectoid"}; // Add your attribute filter options here
+        JComboBox<String> attributeFilterComboBox = new JComboBox<>(attributeFilterOptions);
+        attributeFilterComboBox.addActionListener(e ->
+        {
+            String selectedAttribute = (String) attributeFilterComboBox.getSelectedItem();
+            if (!selectedAttribute.equals("All"))
+            {
+                filterByAttribute(selectedAttribute);
+            } else
+            {
+                resetMonsterList();
+            }
+        });
+        return attributeFilterComboBox;
     }
 
     public void updateSlayerLevel()
